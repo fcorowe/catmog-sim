@@ -1,0 +1,377 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+
+\documentclass[
+  a4paper, 
+  twoside,
+  final
+]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else  
+    % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{5}
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\usepackage{region,hyperref,multirow}
+\definecolor{mypink}{RGB}{219, 48, 122}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage[]{natbib}
+\bibliographystyle{region}
+\usepackage{bookmark}
+
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={A practical guide to spatial interaction modelling},
+  pdfauthor={Blinded},
+  pdfkeywords={spatial interaction modelling, gravity modelling, flow
+data},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+
+
+\title{A practical guide to spatial interaction modelling}
+\author{%
+Blinded\parnote{}}
+\date{}
+
+\setcounter{page}{999}
+\renewcommand{\thepage}{\arabic{page}}  % L for Letters, R for Resources, E for Editorial
+\jvol{1} 
+\jnum{1} 
+\jyear{2020} 
+\jpages{999--999} 
+\jauthor{MISSING} 
+\received{} 
+\accepted{} 
+
+\jdoi{10.18335/region.v??i??.???} 
+
+\setlength{\parskip}{0pt plus1pt}
+\setlength{\parindent}{15pt}
+
+% %\bibliographystyle{plainnat}
+\bibpunct{(}{)}{,}{a}{}{,}   % % changes formatting in natbib, see http://merkel.zoneo.net/Latex/natbib.php
+% % It can be moved into the package call!
+
+%%%%%%%%%%% GM inserted %%%%%%%%%%%%%%%
+\usepackage[breakable]{tcolorbox}
+
+% prompt
+\makeatletter
+\newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+\makeatother
+\newcommand{\prompt}[4]{
+	\ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}
+}
+
+\definecolor{incolor}{HTML}{303F9F}
+\definecolor{outcolor}{HTML}{D84315}
+\definecolor{cellborder}{HTML}{CFCFCF}
+\definecolor{cellbackground}{HTML}{F7F7F7}
+\definecolor{celloutborder}{HTML}{FFAFAF}
+\definecolor{celloutbackground}{HTML}{F7E7E7}
+
+\newcounter{code}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{ROutput}{\definecolor{shadecolor}{HTML}{F7E7E7}\begin{snugshade}}{\end{snugshade}}
+\newenvironment*{RInput}{}{}
+\begin{document}
+\maketitle
+\begin{abstract}
+This document is only a demo explaining how to use the template.
+\end{abstract}
+
+
+\section{Introduction}\label{sec-intro}
+
+Spatial interaction models (SIMs) is a core tool to simulate flows
+between different locations in physical space. They are a valuable
+resource through which the geographic structure between locations
+encoded in aggregate flows of people, information and goods can be
+represented and understood. Intuitively, SIMs seek to capture the
+spatial interaction between places as a function of three components:
+origin attributes, destination attributes and their separation. Inspired
+by Newtonian concepts developed in physics, spatial flows between
+locations are conceived as the result of their proportional
+gravitational force and inverse association with spatial separation.
+Attributes of origin and destination locations are employed to represent
+gravitational forces pushing and pulling people, information and goods
+between specific locations. Various forms of distance and costs are used
+to represent the deterring effects of geographical separation on spatial
+flows.
+
+SIMs are widely used for prediction and inference. They are used to make
+inference about the factors contributing to influence spatial flows.
+They have been used to understand the magnitude and direction of
+influence of individual and place-level attributes on geographic flows.
+Understanding the effect of these factors offers valuable evidence to
+inform the development of appropriate plans, strategies and
+interventions \citep{fotheringham_okelly1989}. SIMs are also used to
+make predictions of the size of spatial flows. These predictions are
+normally used to assess the impact of interventions and creation of
+``what-if'' scenarios, providing guidance for the identification of
+optimal locations and size for potential new service units {[}REF{]}. In
+this context, SIMs are often used to evaluate the impact of new bus
+stops, shopping stores, schools or housing units on their potential
+demand and traffic changes \citep{fotheringham_okelly1989}. To these
+ends, SIMs have been used to address questions in a variety of settings,
+including retail, migration, transport, trade, commuting, school travel
+and more broadly urban planning.
+
+Yet, the implementation of SIMs remains a challenge. Algorithms to
+calibrate the parameters of SIMs have remained locked away, either
+behind dense algebraic notation in dusty papers from the 1970s, or
+behind paywalls of commercial software \citep{rowe2024}. Additionally,
+\citet{rowe2024} noted a dearth of knowledge within geographical
+education as SIMs are not widely taught in undergraduate programmes in
+the same way as, for instance, regression models are taught in economics
+or social psychology. This situation is argued to have occurred despite
+the availability of effective routines to calibrate SIMs via popular
+linear and general linear modelling frameworks, and as practical
+expediency is sacrificed at the expense of theoretical or technical
+prowess \citep{rowe2024}. The ways in which calibration procedures are
+presented as lengthy mathematical derivation or passing reference to
+ordinary least square tend to hamper accessibility for the easy
+implementation of SIMs.
+
+This computational notebook contributes to redressing these issues. It
+aims to provide an intuitive, understandable and practical guide to
+estimate SIMs in a variety of modelling frameworks. It will include the
+necessary code to calibrate SIMs, using origin-destination
+travel-to-work data for the United Kingdom in R programming language.
+The code provided is generisable and can be adapted to different
+origin-destination flow data and contexts, including migration, student,
+transport, trade, currency, data transfer, vessel, shipment and freight
+flows.
+
+The notebook is structured as follows. The next section sets out some
+fundamental concepts and definitions relating to SIMs.
+Section~\ref{sec-comenv} identifies the libraries used before
+Section~\ref{sec-data} describes the data. Section~\ref{sec-visualising}
+illustrates key techniques to visualise complex spatial interaction
+data, and Section~\ref{sec-modelling} shows and explains how to estimate
+SIMs using a range of modelling frameworks. It start with traditional
+mathematical and Ordinary Least Squares (OLS) approaches to more
+advanced statistical frameworks, such as Generalised Linear Mixed Models
+(GLMMs) and machine learning algorithms.
+
+\section{Context}\label{context}
+
+SIMs take various forms. Newtonian gravity models are probably the most
+widely known and used form of SIMs. Inspired by Newton's law of gravity,
+the basic gravity version of these models assumes that the spatial flows
+or interactions between an origin (\(i\)) and a destination \(j\) is
+proportional to their masses (\(M_{i}\) and \(M_{j}\)) and inversely
+proportional to their separation (\(D_{ij}\)). Locations are expected to
+interact in a positively reinforcing manner that is multiplicative of
+their masses, but to diminish with the intervening role of their
+separation. The separation between locations is often represented by a
+distance decay function and is measured in terms of the distance, cost
+or time involved in the interaction. Generally, the model includes a
+constant (\(G\)) ensuring that the expected flows do not exceed their
+respective observed counts, and a parameter (\(k\)) representing the
+deterring effect of geographical separation. The task is to estimate
+these parameters. Formally a gravity model can be expressed as:
+
+\[
+T_{ij} = G \frac{M_{i} M_{j}}{D^{k}_{ij} }
+\]
+
+SIMs have three key inputs: (1) a matrix of flows between a set of
+origins and destinations; (2) a measure of separation between origins
+and destinations; and, (3) measures of masses at origin and destination
+locations. The literature usually considers a family of SIMs taking four
+forms which refers to various constraints placed on parameters of the
+model \citep{wilson1971}. There is an \emph{unconstrained} version which
+is actually constrained to ensure that the total sum of the predicted
+flows from a gravity model be equal the total sum of the observed flows
+across all origins and destinations. Constrained versions are used to
+ensure that specific origin or destination observations are met. Three
+general formulations of constrained models are used:
+\emph{production-constrained}, \emph{attraction-constrained} and
+\emph{doubly-constrained} models. \emph{Production-constrained} versions
+are used to constrain a model so that the predicted flows emanating from
+individual origins is equal to their respective observed numbers.
+\emph{Attraction-constrained} versions do the same but at individual
+destinations. \emph{Doubly-constrained} versions combine these two sets
+of constraints to ensure predicted flows are equal to observed flows at
+both origins and destinations.
+
+\section{Computation environment}\label{sec-comenv}
+
+\section{Data}\label{sec-data}
+
+Commuting or migration?
+
+\section{Visualising spatial interaction data}\label{sec-visualising}
+
+\section{Estimating spatial interaction models}\label{sec-modelling}
+
+\subsection{Mathemathical gravity
+models}\label{mathemathical-gravity-models}
+
+\subsection{Statistical gravity
+models}\label{statistical-gravity-models}
+
+\subsection{Extensions}\label{extensions}
+
+\subsubsection{Generalised linear mixed gravity
+models}\label{generalised-linear-mixed-gravity-models}
+
+\subsubsection{Machine learning gravity
+models}\label{machine-learning-gravity-models}
+
+
+\renewcommand\refname{References}
+  \bibliography{bibliography.bib}
+
+
+
+% This is the COPYRIGHT statement for the article.
+\vspace*{\fill}
+\tabcolsep0mm
+\noindent
+\begin{tabular*}{\textwidth}{ll}
+	\toprule
+	\multirow{2}{19mm}{\includegraphics[width=18mm,height=10mm]{_extensions/region-ersa/REGION/CC-BY-88x31}} & {\small \multirow{2}{328pt}{\textcopyright\  by the authors. Licensee: REGION -- The Journal of ERSA, European Regional Science Association, Louvain-la-Neuve, Belgium. This article is distri-}} \\
+	& \\[-1pt]
+	\multicolumn{2}{l}{\small \multirow{2}{\textwidth}{buted under the terms and conditions of the Creative Commons Attri\-bution (CC BY) license (\href{http://creativecommons.org/licenses/by/4.0/}{http://creativecommons.org/licenses/by/4.0/}).}}\\
+	& \\
+	\bottomrule
+\end{tabular*}
+
+\end{document}

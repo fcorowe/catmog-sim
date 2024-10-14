@@ -1,0 +1,179 @@
+---
+title: "A practical guide to spatial interaction modelling"
+format:
+  REGION-pdf:
+    keep-tex: true
+    pdf-engine: pdflatex
+    docstatus: final
+  REGION-html:
+    toc: false
+    format-links: false
+author:
+  - name: Blinded
+    affiliations:
+      - name: 
+        city: 
+        country: 
+abstract: |
+  This document is only a demo explaining how to use the template.
+keywords: [spatial interaction modelling, gravity modelling, flow data]
+bibliography: bibliography.bib  
+#ojsnum: 555
+#jvol: 11
+#jnum: 1
+#jpages: 100--200
+#jyear: 2024
+#jauthor: blinded
+#received: January 1, 2024
+#accepted: January 2, 2024
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+#| echo: false
+# clear the environment
+rm = list(ls())
+```
+
+# Introduction {#sec-intro}
+
+Spatial interaction models (SIMs) is a core tool to simulate flows
+between different locations in physical space. They are a valuable
+resource through which the geographic structure between locations
+encoded in aggregate flows of people, information and goods can be
+represented and understood. Intuitively, SIMs seek to capture the
+spatial interaction between places as a function of three components:
+origin attributes, destination attributes and their separation. Inspired
+by Newtonian concepts developed in physics, spatial flows between
+locations are conceived as the result of their proportional
+gravitational force and inverse association with spatial separation.
+Attributes of origin and destination locations are employed to represent
+gravitational forces pushing and pulling people, information and goods
+between specific locations. Various forms of distance and costs are used
+to represent the deterring effects of geographical separation on spatial
+flows.
+
+SIMs are widely used for prediction and inference. They are used to make
+inference about the factors contributing to influence spatial flows.
+They have been used to understand the magnitude and direction of
+influence of individual and place-level attributes on geographic flows.
+Understanding the effect of these factors offers valuable evidence to
+inform the development of appropriate plans, strategies and
+interventions [@fotheringham_okelly1989]. SIMs are also used to make
+predictions of the size of spatial flows. These predictions are normally
+used to assess the impact of interventions and creation of "what-if"
+scenarios, providing guidance for the identification of optimal
+locations and size for potential new service units \[REF\]. In this
+context, SIMs are often used to evaluate the impact of new bus stops,
+shopping stores, schools or housing units on their potential demand and
+traffic changes [@fotheringham_okelly1989]. To these ends, SIMs have
+been used to address questions in a variety of settings, including
+retail, migration, transport, trade, commuting, school travel and more
+broadly urban planning.
+
+Yet, the implementation of SIMs remains a challenge. Algorithms to
+calibrate the parameters of SIMs have remained locked away, either
+behind dense algebraic notation in dusty papers from the 1970s, or
+behind paywalls of commercial software [@rowe2024]. Additionally,
+@rowe2024 noted a dearth of knowledge within geographical education as
+SIMs are not widely taught in undergraduate programmes in the same way
+as, for instance, regression models are taught in economics or social
+psychology. This situation is argued to have occurred despite the
+availability of effective routines to calibrate SIMs via popular linear
+and general linear modelling frameworks, and as practical expediency is
+sacrificed at the expense of theoretical or technical prowess
+[@rowe2024]. The ways in which calibration procedures are presented as
+lengthy mathematical derivation or passing reference to ordinary least
+square tend to hamper accessibility for the easy implementation of SIMs.
+
+This computational notebook contributes to redressing these issues. It
+aims to provide an intuitive, understandable and practical guide to
+estimate SIMs in a variety of modelling frameworks. It will include the
+necessary code to calibrate SIMs, using origin-destination
+travel-to-work data for the United Kingdom in R programming language.
+The code provided is generisable and can be adapted to different
+origin-destination flow data and contexts, including migration, student,
+transport, trade, currency, data transfer, vessel, shipment and freight
+flows.
+
+The notebook is structured as follows. The next section sets out some
+fundamental concepts and definitions relating to SIMs. @sec-comenv
+identifies the libraries used before @sec-data describes the data.
+@sec-visualising illustrates key techniques to visualise complex spatial
+interaction data, and @sec-modelling shows and explains how to estimate
+SIMs using a range of modelling frameworks. It start with traditional
+mathematical and Ordinary Least Squares (OLS) approaches to more
+advanced statistical frameworks, such as Generalised Linear Mixed Models
+(GLMMs) and machine learning algorithms.
+
+# Context
+
+SIMs take various forms. Newtonian gravity models are probably the most
+widely known and used form of SIMs. Inspired by Newton’s law of gravity,
+the basic gravity version of these models assumes that the spatial flows
+or interactions between an origin ($i$) and a destination $j$ is
+proportional to their masses ($M_{i}$ and $M_{j}$) and inversely
+proportional to their separation ($D_{ij}$). Locations are expected to
+interact in a positively reinforcing manner that is multiplicative of
+their masses, but to diminish with the intervening role of their
+separation. The separation between locations is often represented by a
+distance decay function and is measured in terms of the distance, cost
+or time involved in the interaction. Generally, the model includes a
+constant ($G$) ensuring that the expected flows do not exceed their
+respective observed counts, and a parameter ($k$) representing the
+deterring effect of geographical separation. The task is to estimate
+these parameters. Formally a gravity model can be expressed as:
+
+$$
+T_{ij} = G \frac{M_{i} M_{j}}{D^{k}_{ij} }
+$$
+
+SIMs have three key inputs: (1) a matrix of flows between a set of
+origins and destinations; (2) a measure of separation between origins
+and destinations; and, (3) measures of masses at origin and destination
+locations. The literature usually considers a family of SIMs taking four
+forms which refers to various constraints placed on parameters of the
+model [@wilson1971]. There is an *unconstrained* version which is
+actually constrained to ensure that the total sum of the predicted flows
+from a gravity model be equal the total sum of the observed flows across
+all origins and destinations. Constrained versions are used to ensure
+that specific origin or destination observations are met. Three general
+formulations of constrained models are used: *production-constrained*,
+*attraction-constrained* and *doubly-constrained* models.
+*Production-constrained* versions are used to constrain a model so that
+the predicted flows emanating from individual origins is equal to their
+respective observed numbers. *Attraction-constrained* versions do the
+same but at individual destinations. *Doubly-constrained* versions
+combine these two sets of constraints to ensure predicted flows are
+equal to observed flows at both origins and destinations.
+
+# Computation environment {#sec-comenv}
+
+```{r}
+#| warning: false
+library(tidyverse)
+library(sf)
+library(glmmTMB)
+```
+
+# Data {#sec-data}
+
+Commuting or migration?
+
+# Visualising spatial interaction data {#sec-visualising}
+
+# Estimating spatial interaction models {#sec-modelling}
+
+## Mathemathical gravity models
+
+## Statistical gravity models
+
+## Extensions
+
+### Generalised linear mixed gravity models
+
+### Machine learning gravity models
+
+# References
