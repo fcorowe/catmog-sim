@@ -295,7 +295,8 @@ df %>%
   # remove predictions
   filter( distance_km != 0) %>% 
   ggplot( aes( x = count, y = predicted_flow)) +
-  geom_point( alpha = .5, colour = "darkblue") +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
   # change axis label to a shorthand
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale())
@@ -304,7 +305,7 @@ df %>%
     labels = label_number(scale_cut = cut_short_scale())
     ) + 
   # change colour scale
-  #scale_colour_distiller(palette = "RdBu", direction = -1) +
+  # scale_colour_distiller(palette = "RdBu", direction = -1) +
   labs(y = "Predicted flow",
        x = "Observed flow") +
   theme_plot_tufte() +
@@ -500,8 +501,8 @@ production_constrained_plot <- df %>%
   # remove predictions
   filter( distance_km != 0) %>% 
   ggplot( aes( x = count, y = production_constrained_flow)) +
-  geom_point( alpha = .8, aes(colour = count, 
-                              size = abs(population_o / 1e1)) ) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
   # change axis label to a shorthand
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale())
@@ -509,8 +510,7 @@ production_constrained_plot <- df %>%
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale())
     ) + 
-  # change colour scale
-  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  # change labels
   labs(y = "Population-constrained \n predicted flow",
        x = "Observed flow") +
   theme_plot_tufte() +
@@ -524,8 +524,8 @@ attraction_constrained_plot <- df %>%
   # remove predictions
   filter( distance_km != 0) %>% 
   ggplot( aes( x = count, y = attraction_constrained_flow)) +
-  geom_point( alpha = .8, aes(colour = count, 
-                              size = abs(population_o / 1e1)) ) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
   # change axis label to a shorthand
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale())
@@ -533,8 +533,7 @@ attraction_constrained_plot <- df %>%
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale())
     ) + 
-  # change colour scale
-  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  # change labels
   labs(y = "Attraction-constrained \n predicted flow",
        x = "Observed flow") +
   theme_plot_tufte() +
@@ -548,8 +547,8 @@ doubly_constrained_plot <- df %>%
   # remove predictions
   filter( distance_km != 0) %>% 
   ggplot( aes( x = count, y = predicted_flow)) +
-  geom_point( alpha = .8, aes(colour = count, 
-                              size = abs(population_o / 1e1)) ) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
   # change axis label to a shorthand
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale())
@@ -557,8 +556,7 @@ doubly_constrained_plot <- df %>%
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale())
     ) + 
-  # change colour scale
-  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  # change labels
   labs(y = "Doubly-constrained \n predicted flow",
        x = "Observed flow") +
   theme_plot_tufte() +
@@ -605,6 +603,25 @@ poissonrm <- glm(count ~ population_o + population_d + distance_km,
 summary(poissonrm)
 ```
 
+*Constrained models*
+
+```{r}
+# Production contrained 
+production_constrained_poissonrm <- glm(count ~ ltla_res_code +  population_o + population_d + distance_km,
+                 data = df,
+                 family = poisson)
+
+# Attraction contrained 
+attraction_constrained_poissonrm <- glm(count ~ ltla_work_code +  population_o + population_d + distance_km,
+                 data = df,
+                 family = poisson)
+
+# Doubly contrained 
+doubly_constrained_poissonrm <- glm(count ~ ltla_res_code + ltla_work_code +  population_o + population_d + distance_km,
+                 data = df,
+                 family = poisson)
+```
+
 ```{r}
 df$lrm_predicted_flow <- predict(lrm, type = "response")
 df$loglrm_predicted_flow <- predict(loglrm, type = "response")
@@ -616,8 +633,8 @@ df$poissonrm_predicted_flow <- predict(poissonrm, type = "response")
 lrm_plot <- df %>% 
   # remove predictions
   ggplot( aes( x = count, y = lrm_predicted_flow)) +
-  geom_point( alpha = .8, aes(colour = count, 
-                              size = abs(population_o / 1e1)) ) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
   # change axis label to a shorthand
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale())
@@ -625,8 +642,7 @@ lrm_plot <- df %>%
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale())
     ) + 
-  # change colour scale
-  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  # change labels
   labs(y = "LRM predicted flow",
        x = "Observed flow") +
   theme_plot_tufte() +
@@ -640,8 +656,8 @@ lrm_plot <- df %>%
 loglrm_plot <- df %>% 
   # remove predictions
   ggplot( aes( x = count, y = exp(loglrm_predicted_flow) )) +
-  geom_point( alpha = .8, aes(colour = count, 
-                              size = abs(population_o / 1e1)) ) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
   # change axis label to a shorthand
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale())
@@ -649,8 +665,7 @@ loglrm_plot <- df %>%
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale())
     ) + 
-  # change colour scale
-  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  # change labels
   labs(y = "Log LRM predicted flow",
        x = "Observed flow") +
   theme_plot_tufte() +
@@ -664,8 +679,8 @@ loglrm_plot <- df %>%
 poissonrm_plot <- df %>% 
   # remove predictions
   ggplot( aes( x = count, y = poissonrm_predicted_flow)) +
-  geom_point( alpha = .8, aes(colour = count, 
-                              size = abs(population_o / 1e1)) ) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
   # change axis label to a shorthand
   scale_y_continuous(
     labels = label_number(scale_cut = cut_short_scale())
@@ -673,8 +688,7 @@ poissonrm_plot <- df %>%
   scale_x_continuous(
     labels = label_number(scale_cut = cut_short_scale())
     ) + 
-  # change colour scale
-  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  # change labels
   labs(y = "Poisson RM predicted flow",
        x = "Observed flow") +
   theme_plot_tufte() +

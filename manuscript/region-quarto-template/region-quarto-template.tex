@@ -521,8 +521,8 @@ destination only.
   \CommentTok{\# remove predictions}
   \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ predicted\_flow)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
-                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{5}\NormalTok{, }\AttributeTok{colour =} \StringTok{"darkblue"}\NormalTok{,}
+              \FunctionTok{aes}\NormalTok{( }\AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
   \CommentTok{\# change axis label to a shorthand}
   \FunctionTok{scale\_y\_continuous}\NormalTok{(}
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
@@ -531,7 +531,7 @@ destination only.
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
 \NormalTok{    ) }\SpecialCharTok{+} 
   \CommentTok{\# change colour scale}
-  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\# scale\_colour\_distiller(palette = "RdBu", direction = {-}1) +}
   \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Predicted flow"}\NormalTok{,}
        \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
@@ -730,8 +730,8 @@ will do this by using statistical models.
   \CommentTok{\# remove predictions}
   \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ production\_constrained\_flow)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
-                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{5}\NormalTok{, }\AttributeTok{colour =} \StringTok{"darkblue"}\NormalTok{,}
+              \FunctionTok{aes}\NormalTok{( }\AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
   \CommentTok{\# change axis label to a shorthand}
   \FunctionTok{scale\_y\_continuous}\NormalTok{(}
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
@@ -739,8 +739,7 @@ will do this by using statistical models.
   \FunctionTok{scale\_x\_continuous}\NormalTok{(}
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
 \NormalTok{    ) }\SpecialCharTok{+} 
-  \CommentTok{\# change colour scale}
-  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\# change labels}
   \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Population{-}constrained }\SpecialCharTok{\textbackslash{}n}\StringTok{ predicted flow"}\NormalTok{,}
        \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
@@ -754,8 +753,8 @@ will do this by using statistical models.
   \CommentTok{\# remove predictions}
   \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ attraction\_constrained\_flow)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
-                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{5}\NormalTok{, }\AttributeTok{colour =} \StringTok{"darkblue"}\NormalTok{,}
+              \FunctionTok{aes}\NormalTok{( }\AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
   \CommentTok{\# change axis label to a shorthand}
   \FunctionTok{scale\_y\_continuous}\NormalTok{(}
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
@@ -763,8 +762,7 @@ will do this by using statistical models.
   \FunctionTok{scale\_x\_continuous}\NormalTok{(}
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
 \NormalTok{    ) }\SpecialCharTok{+} 
-  \CommentTok{\# change colour scale}
-  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\# change labels}
   \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Attraction{-}constrained }\SpecialCharTok{\textbackslash{}n}\StringTok{ predicted flow"}\NormalTok{,}
        \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
@@ -778,8 +776,8 @@ will do this by using statistical models.
   \CommentTok{\# remove predictions}
   \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ predicted\_flow)) }\SpecialCharTok{+}
-  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
-                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{5}\NormalTok{, }\AttributeTok{colour =} \StringTok{"darkblue"}\NormalTok{,}
+              \FunctionTok{aes}\NormalTok{( }\AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
   \CommentTok{\# change axis label to a shorthand}
   \FunctionTok{scale\_y\_continuous}\NormalTok{(}
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
@@ -787,8 +785,7 @@ will do this by using statistical models.
   \FunctionTok{scale\_x\_continuous}\NormalTok{(}
     \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
 \NormalTok{    ) }\SpecialCharTok{+} 
-  \CommentTok{\# change colour scale}
-  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \CommentTok{\# change labels}
   \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Doubly{-}constrained }\SpecialCharTok{\textbackslash{}n}\StringTok{ predicted flow"}\NormalTok{,}
        \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
   \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
@@ -804,6 +801,9 @@ will do this by using statistical models.
 
 \subsection{Statistical gravity
 models}\label{statistical-gravity-models}
+
+Use the following structure: describe the intuition of the model
+specification, and provide some interpretation of the results
 
 \subsubsection{Linear regression model}\label{linear-regression-model}
 
@@ -886,6 +886,8 @@ AIC: 37751790
 
 Number of Fisher Scoring iterations: 8
 \end{verbatim}
+
+\includegraphics{region-quarto-template_files/figure-pdf/unnamed-chunk-13-1.pdf}
 
 \subsection{Extensions}\label{extensions}
 
