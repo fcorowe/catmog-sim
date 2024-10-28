@@ -1,0 +1,203 @@
+---
+title: "Creating dataset for SIM CATMOG"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(sf)
+library(geodist)
+library(future.apply)
+```
+
+```{r}
+# census population data
+si_df <- read_csv("../data/input/ODWP01EW_LTLA.csv")
+var_df <- read_csv("../data/input/combined-data-ltla.csv")
+# census boundaries
+ltla_sdf <- st_read("../data/input/LAD_Dec_2021_GB_BFC_2022_simplified.gpkg")
+```
+
+# Population data
+
+```{r}
+joined_dfo <- left_join(si_df, var_df, by = c("Lower tier local authorities code" = "geography.code") )
+
+joined_dfod <- left_join(joined_dfo, var_df, by = c("LTLA of workplace code" = "geography.code") )
+
+head(joined_dfod)
+```
+
+```{r}
+subset_joined_dfod <- joined_dfod %>% select("Lower tier local authorities code", 
+       "Lower tier local authorities label",
+       "LTLA of workplace code",
+       "LTLA of workplace label",
+       "Place of work indicator (4 categories) code",
+       "Place of work indicator (4 categories) label",
+       "Count",
+       "total_residents.x",
+       "per_NS_SeC_L123_higher_managerial_administrative_professional.x",
+       "per_NS_SeC_L456_lower_managerial_administrative_professional.x",
+       "per_NS_SeC_L7_intermediate.x",
+       "per_NS_SeC_L89_small_employers_own_account.x",
+       "per_NS_SeC_L1011_lower_supervisory_technical.x",
+       "per_NS_SeC_L12_semi_routine.x",
+       "per_NS_SeC_L13_routine.x",
+       "per_NS_SeC_L141142_never_worked_unemployed.x",
+       "per_NS_SeC_L15_ft_students.x",
+       "per_no_qualifications.x",
+       "per_level4.x",
+       "total_residents.y",
+       "per_NS_SeC_L123_higher_managerial_administrative_professional.y",
+       "per_NS_SeC_L456_lower_managerial_administrative_professional.y",
+       "per_NS_SeC_L7_intermediate.y",
+       "per_NS_SeC_L89_small_employers_own_account.y",
+       "per_NS_SeC_L1011_lower_supervisory_technical.y",
+       "per_NS_SeC_L12_semi_routine.y",
+       "per_NS_SeC_L13_routine.y",
+       "per_NS_SeC_L141142_never_worked_unemployed.y",
+       "per_NS_SeC_L15_ft_students.y",
+       "per_no_qualifications.y",
+       "per_level4.y"
+) %>% rename(
+      "population_o" = "total_residents.x",
+      "higher_managerial_administrative_professional_o" =  "per_NS_SeC_L123_higher_managerial_administrative_professional.x",
+      "lower_managerial_administrative_professional_o" =  "per_NS_SeC_L456_lower_managerial_administrative_professional.x",
+      "intermediate_o"= "per_NS_SeC_L7_intermediate.x",
+      "small_employers_own_account_o" = "per_NS_SeC_L89_small_employers_own_account.x",
+      "lower_supervisory_technical_o" = "per_NS_SeC_L1011_lower_supervisory_technical.x",
+      "semi_routine_o" = "per_NS_SeC_L12_semi_routine.x",
+      "routine_o" = "per_NS_SeC_L13_routine.x",
+      "never_worked_unemployed_o" = "per_NS_SeC_L141142_never_worked_unemployed.x",
+      "ft_students_o" = "per_NS_SeC_L15_ft_students.x",
+      "no_qualifications_o" = "per_no_qualifications.x",
+      "level4_o" = "per_level4.x",
+      "population_d" = "total_residents.y",
+      "higher_managerial_administrative_professional_d" =  "per_NS_SeC_L123_higher_managerial_administrative_professional.y",
+      "lower_managerial_administrative_professional_d" =  "per_NS_SeC_L456_lower_managerial_administrative_professional.y",
+      "intermediate_d"= "per_NS_SeC_L7_intermediate.y",
+      "small_employers_own_account_d" = "per_NS_SeC_L89_small_employers_own_account.y",
+      "lower_supervisory_technical_d" = "per_NS_SeC_L1011_lower_supervisory_technical.y",
+      "semi_routine_d" = "per_NS_SeC_L12_semi_routine.y",
+      "routine_d" = "per_NS_SeC_L13_routine.y",
+      "never_worked_unemployed_d" = "per_NS_SeC_L141142_never_worked_unemployed.y",
+      "ft_students_d" = "per_NS_SeC_L15_ft_students.y",
+      "no_qualifications_d" = "per_no_qualifications.y",
+      "level4_d" = "per_level4.y",
+  
+)
+head(joined_dfod)
+```
+
+```{r}
+write_csv(subset_joined_dfod, "../data/output/sim_uk-travel-to-work_2021_intermediate.csv")
+```
+
+# Distance
+
+```{r}
+head(ltla_sdf)
+```
+
+```{r}
+# check and transform the CRS 
+st_crs(ltla_sdf)  # check the CRS
+projected_ltla_sdf <- st_transform(ltla_sdf, crs = 32633)  # project to UTM, if needed
+
+```
+
+```{r}
+# extract centroids
+centroids <- st_centroid(projected_ltla_sdf)
+```
+
+```{r}
+# extract centroid coordinates (longitude, latitude)
+centroid_coords <- st_coordinates(centroids)
+```
+
+```{r}
+# compute distances using geodist (Vincenty measure by default)
+# distance_matrix <- geodist(centroid_coords, measure = "cheap")
+```
+
+```{r}
+# set up parallel processing using future.apply
+plan(multisession)  # enables parallel processing on multiple cores
+```
+
+```{r}
+# compute the distance matrix in parallel using future_sapply
+# loop through each centroid and compute the distance to all other centroids
+distance_matrix <- future_sapply(1:nrow(centroid_coords), function(i) {
+  geodist(centroid_coords[i, , drop = FALSE], centroid_coords, measure = "vincenty")
+})
+
+# transform the distance matrix to a data frame
+distance_df <- as.data.frame(distance_matrix)
+
+# print the result
+#print(distance_matrix)
+
+# turn off parallel plan after processing
+plan(sequential)
+```
+
+Match distance matrix to the original spatial data frame and then into long format
+
+```{r}
+# Set row and column names based on the polygon IDs
+rownames(distance_df) <- projected_ltla_sdf$code
+colnames(distance_df) <- projected_ltla_sdf$code
+
+# Step 4: Transform the distance_df into a long format
+distance_long <- distance_df %>%
+  rownames_to_column("origin") %>%       # Convert row names to a column for origin IDs
+  pivot_longer(cols = -origin,           # All other columns (distances) are destination distances
+               names_to = "destination", # New column for destination IDs
+               values_to = "distance")   # New column for distance values
+
+# View the long format data
+head(distance_long)
+```
+
+```{r}
+# compute the distance matrix
+# distance_matrix <- st_distance(projected_ltla_sdf)
+```
+
+```{r}
+# extract a specific distance between two geometries (optional)
+# dist <- st_distance(sf_object_projected[1, ], sf_object_projected[2, ])
+
+```
+
+```{r}
+# print the distance matrix and specific distance
+# print(distance_matrix)
+# print(dist)
+```
+
+```{r}
+distance_long$distance_km <- distance_long$distance / 1000
+write_csv(distance_long, "../data/output/sim_uklda-distance.csv")
+```
+
+## Merge population and distance
+
+```{r}
+joined_dfod <- left_join(subset_joined_dfod, distance_long, by = c("Lower tier local authorities code" = "origin", "LTLA of workplace code" = "destination") )
+```
+
+## Remove Scotland and Northern Ireland-bounded counts
+
+```{r}
+filtered_joined_dfod <- joined_dfod %>%
+  filter(!grepl("^[SN]", `LTLA of workplace code`))
+```
+
+```{r}
+write_csv(filtered_joined_dfod, "../data/output/sim_uk-travel-to-work_2021.csv")
+```

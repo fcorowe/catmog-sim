@@ -22,6 +22,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -148,37 +182,212 @@ window.Quarto = {
 </section>
 <section id="context" class="level1" data-number="2">
 <h1 data-number="2"><span class="header-section-number">2</span> Context</h1>
-<p>SIMs take various forms. Newtonian gravity models are probably the most widely known and used form of SIMs. Inspired by Newton’s law of gravity, the basic gravity version of these models assumes that the spatial flows or interactions between an origin (<span class="math inline">\(i\)</span>) and a destination <span class="math inline">\(j\)</span> is proportional to their masses (<span class="math inline">\(M_{i}\)</span> and <span class="math inline">\(M_{j}\)</span>) and inversely proportional to their separation (<span class="math inline">\(D_{ij}\)</span>). Locations are expected to interact in a positively reinforcing manner that is multiplicative of their masses, but to diminish with the intervening role of their separation. The separation between locations is often represented by a distance decay function and is measured in terms of the distance, cost or time involved in the interaction. Generally, the model includes a constant (<span class="math inline">\(G\)</span>) ensuring that the expected flows do not exceed their respective observed counts, and a parameter (<span class="math inline">\(k\)</span>) representing the deterring effect of geographical separation. The task is to estimate these parameters. Formally a gravity model can be expressed as:</p>
-<p><span class="math display">\[
-T_{ij} = G \frac{M_{i} M_{j}}{D^{k}_{ij} }
-\]</span></p>
-<p>SIMs have three key inputs: (1) a matrix of flows between a set of origins and destinations; (2) a measure of separation between origins and destinations; and, (3) measures of masses at origin and destination locations. The literature usually considers a family of SIMs taking four forms which refers to various constraints placed on parameters of the model <span class="citation" data-cites="wilson1971">(<a href="#ref-wilson1971" role="doc-biblioref">Wilson, 1971</a>)</span>. There is an <em>unconstrained</em> version which is actually constrained to ensure that the total sum of the predicted flows from a gravity model be equal the total sum of the observed flows across all origins and destinations. Constrained versions are used to ensure that specific origin or destination observations are met. Three general formulations of constrained models are used: <em>production-constrained</em>, <em>attraction-constrained</em> and <em>doubly-constrained</em> models. <em>Production-constrained</em> versions are used to constrain a model so that the predicted flows emanating from individual origins is equal to their respective observed numbers. <em>Attraction-constrained</em> versions do the same but at individual destinations. <em>Doubly-constrained</em> versions combine these two sets of constraints to ensure predicted flows are equal to observed flows at both origins and destinations.</p>
+<p>SIMs take various forms. Newtonian gravity models are probably the most widely known and used form of SIMs. Inspired by Newton’s law of gravity, the basic gravity version of these models assumes that the spatial flows or interactions between an origin (<span class="math inline">\(i\)</span>) and a destination <span class="math inline">\(j\)</span> is proportional to their masses (<span class="math inline">\(M_{i}\)</span> and <span class="math inline">\(M_{j}\)</span>) and inversely proportional to their separation (<span class="math inline">\(D_{ij}\)</span>). Locations are expected to interact in a positively reinforcing manner that is multiplicative of their masses, but to diminish with the intervening role of their separation. The parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\gamma\)</span> reflect the proportional relationship between the masses and flows. The separation between locations is often represented by a distance decay function and is measured in terms of the distance, cost or time involved in the interaction. Generally, the model includes a constant (<span class="math inline">\(\kappa\)</span>) ensuring that the expected flows do not exceed their respective observed counts, and a parameter (<span class="math inline">\(\beta\)</span>) representing the deterring effect of geographical separation. The task is to estimate the parameters <span class="math inline">\(\kappa\)</span>, <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\beta\)</span>. Following <span class="citation" data-cites="wilson1971">Wilson (<a href="#ref-wilson1971" role="doc-biblioref">1971</a>)</span>, a gravity model can be expressed as:</p>
+<p><span id="eq-1"><span class="math display">\[
+T_{ij} = \kappa \frac{M^{\mu}_{i} M^{\gamma}_{j}}{D^{\beta}_{ij} }
+\tag{1}\]</span></span></p>
+<p>SIMs have three key inputs: (1) a matrix of flows between a set of origins and destinations; (2) a measure of separation between origins and destinations; and, (3) measures of masses at origin and destination locations. The literature usually considers a family of SIMs taking four forms which refers to various constraints placed on parameters of the model <span class="citation" data-cites="wilson1971">(<a href="#ref-wilson1971" role="doc-biblioref">Wilson, 1971</a>)</span>. There is an <em>unconstrained</em> version which offers a measure of spatial separation, assuming that there is no information on the number of flows originating from each origin to each destination. The number of flows is thus estimated via SIMs using surrogate factors, such as population at the origin and destiination. Constrained versions are used to ensure that specific origin or destination observations are met. Three general formulations of constrained models are used: <em>production-constrained</em>, <em>attraction-constrained</em> and <em>doubly-constrained</em> models. <em>Production-constrained</em> versions are used to constrain a model to origin factors so that the predicted flows emanating from individual origins are in proportion to the relative attractiveness of each destination. <em>Attraction-constrained</em> versions do the same but constrain models to destination factors so that the predicted flows terminating at each destination are in proportion to the relative attactiveness at individual origins. <em>Doubly-constrained</em> versions combine these two sets of constraints to ensure predicted flows are equal to observed flows are constrained by both origin and destination factors.</p>
+<p>Various modelling frameworks have been used to calibrate the parameters of SIMs. Originally, mathematical formulations were heavily used but these did not offer any ideas of uncertainty about the estimated parameters and were seen as deterministic. To mitigate this, statistical frameworks proliferated. A simple and widely used formulation is a linear model in which geographic flows are logged to meet the normality modelling assumptions, and OLS and maximum likelihood optimisation frameworks are used to estimate the model parameters. However, linear modelling has various constraints and cannot easily incorporate flow counts of zero, right-skewed distributions of flows and non-linear relationships between flows and the set of predictors. As result, more advanced modelling frameworks have been used to fit SIMs, including count data approaches such as Poison and Negative Binomial Models <span class="citation" data-cites="rowe2023urban">(<a href="#ref-rowe2023urban" role="doc-biblioref">Rowe et al., 2023</a>)</span>, Generalised Linear Mixed Models <span class="citation" data-cites="apariciocastro2023">(<a href="#ref-apariciocastro2023" role="doc-biblioref">Aparicio Castro et al., 2023</a>)</span> and more recently machine learning <span class="citation" data-cites="rowe2022">(<a href="#ref-rowe2022" role="doc-biblioref">Rowe et al., 2022</a>)</span> and deep learning models <span class="citation" data-cites="simini2021">(<a href="#ref-simini2021" role="doc-biblioref">Simini et al., 2021</a>)</span>. This computational notebook will provide a practical guide on how to implement these models using travel-to-work data for the UK. The next sections will first introduce the computational environment and data used for this purpose.</p>
 </section>
 <section id="sec-comenv" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Computation environment</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data management </span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># spatial data management</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># generalised mixed linear modelling</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmmTMB)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># data visualisation</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../../code/style/data-visualisation_theme.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="sec-data" class="level1" data-number="4">
 <h1 data-number="4"><span class="header-section-number">4</span> Data</h1>
-<p>Commuting or migration?</p>
+<p>We use an origin-destination matrix capturing travel-to-work commuting flows from the 2021 Census for England and Wales. The data provide estimates on usual residents aged 16 years and over and in employment before the Census week at the Lower Tier Local Authority (LTLA) level. The estimates capture the movement of people between their LTLA area of residence and work. The data are available in a long origin-destination pair format. The first seven columns contain the core components of a spatial interaction dataset, including code and names for origin and destination locations, and the population count moving between a origin-destination pair. The remainder of the dataset comprises the origin and destination attributes, including the total population count and population counts by socioeconomic categories. Columns 9 to 19 contain the attributes at origins and columns 20 to 31 contain the attributes at destinations. Looking at the data frame vertically, the first row shown below displays the count of people who reported Hartlepool as their place of residence and work. The third row shows the count of people who were residing in Hartlepool but reported to travel to work in Middlesbrough.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read data</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"../../data/output/sim_uk-travel-to-work_2021.csv"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># rename variables</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ltla_res_code =</span> <span class="st">"Lower tier local authorities code"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">ltla_res_name =</span> <span class="st">"Lower tier local authorities label"</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ltla_work_code =</span> <span class="st">"LTLA of workplace code"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ltla_work_name =</span> <span class="st">"LTLA of workplace label"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">ltla_work_id_code =</span> <span class="st">"Place of work indicator (4 categories) code"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ltla_work_id_lbl =</span> <span class="st">"Place of work indicator (4 categories) label"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">count =</span> <span class="st">"Count"</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># exclude the following observations:</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(<span class="sc">!</span>ltla_work_name <span class="sc">%in%</span> </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">c</span>(<span class="st">"Does not apply"</span>, </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Workplace is offshore installation"</span>, </span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"Workplace is outside the UK"</span>) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># exclude the following variables:</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>( <span class="sc">-</span><span class="fu">c</span>(ltla_work_id_code, ltla_work_id_lbl) ) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># exclude stayers</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(ltla_res_code <span class="sc">!=</span> ltla_work_code) </span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(df, <span class="at">n =</span> <span class="dv">5</span> ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 31
+  ltla_res_code ltla_res_name ltla_work_code ltla_work_name   count population_o
+  &lt;chr&gt;         &lt;chr&gt;         &lt;chr&gt;          &lt;chr&gt;            &lt;dbl&gt;        &lt;dbl&gt;
+1 E06000001     Hartlepool    E06000002      Middlesbrough     1500        92338
+2 E06000001     Hartlepool    E06000003      Redcar and Clev…   671        92338
+3 E06000001     Hartlepool    E06000004      Stockton-on-Tees  4240        92338
+4 E06000001     Hartlepool    E06000005      Darlington         398        92338
+5 E06000001     Hartlepool    E06000007      Warrington           2        92338
+# ℹ 25 more variables: higher_managerial_administrative_professional_o &lt;dbl&gt;,
+#   lower_managerial_administrative_professional_o &lt;dbl&gt;, intermediate_o &lt;dbl&gt;,
+#   small_employers_own_account_o &lt;dbl&gt;, lower_supervisory_technical_o &lt;dbl&gt;,
+#   semi_routine_o &lt;dbl&gt;, routine_o &lt;dbl&gt;, never_worked_unemployed_o &lt;dbl&gt;,
+#   ft_students_o &lt;dbl&gt;, no_qualifications_o &lt;dbl&gt;, level4_o &lt;dbl&gt;,
+#   population_d &lt;dbl&gt;, higher_managerial_administrative_professional_d &lt;dbl&gt;,
+#   lower_managerial_administrative_professional_d &lt;dbl&gt;, …</code></pre>
+</div>
+</div>
 </section>
 <section id="sec-visualising" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Visualising spatial interaction data</h1>
 </section>
 <section id="sec-modelling" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Estimating spatial interaction models</h1>
-<section id="mathemathical-gravity-models" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="mathemathical-gravity-models"><span class="header-section-number">6.1</span> Mathemathical gravity models</h2>
+<p>This section focuses on how to calibrate spatial interaction models in the form of gravity models. It starts with the classical mathematical formulation, then moves to basic statistical frameworks and their extensions.</p>
+<section id="mathematical-gravity-models" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="mathematical-gravity-models"><span class="header-section-number">6.1</span> Mathematical gravity models</h2>
+<section id="unconstrained-model" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="unconstrained-model"><span class="header-section-number">6.1.1</span> Unconstrained model</h3>
+<p>We start by implementing the mathematical formulation of gravity models using <a href="#eq-1" class="quarto-xref">Equation&nbsp;1</a>. We adopt the standard Newtonian formulation assuming that <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\gamma\)</span> equal to 1 and <span class="math inline">\(\beta\)</span> to -2, and fit an <em>unconstrained</em> model. Recall here that this model assumes that no information on flows is available. We use the population at origin and destination LDAs and distance between LDA centroids in kilometers to define this model. To assess the model’s predictive capacity, we graphically compare predicted flows <em>versus</em> observed flows. We focus on movements between LDAs, removing movements within LDAs with distance zero. A perfect model would product predicted flows displaying a perfect positive linear relationship with the orbserved flows. The figure below shows the unconstrained model results displaying little correspondence between the predicted and observed flows. The model predicts unrealistic flows of over 10 million which exceeds the size of the observed flows. This reflects the unconstrained nature of the model producing predictions based on distance, origin and destination only.</p>
+<div id="fig-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Unconstrained model</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># assuming these parameters</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>gamma <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>kappa <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># using equation 1 to estimate unconstrained model</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>predicted_flow <span class="ot">&lt;-</span> <span class="fu">round</span>( kappa <span class="sc">*</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  (df<span class="sc">$</span>population_o<span class="sc">^</span>mu <span class="sc">*</span> df<span class="sc">$</span>population_d<span class="sc">^</span>gamma) <span class="sc">/</span> (df<span class="sc">$</span>distance_km<span class="sc">^</span>beta) </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># predicted versus observed flows</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>df <span class="sc">%&gt;%</span> </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># remove predictions</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>( distance_km <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>( <span class="fu">aes</span>( <span class="at">x =</span> count, <span class="at">y =</span> predicted_flow)) <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>( <span class="at">alpha =</span> .<span class="dv">8</span>, <span class="fu">aes</span>(<span class="at">colour =</span> count, </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                              <span class="at">size =</span> <span class="fu">abs</span>(population_o <span class="sc">/</span> <span class="fl">1e1</span>)) ) <span class="sc">+</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># change axis label to a shorthand</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">label_number</span>(<span class="at">scale_cut =</span> <span class="fu">cut_short_scale</span>())</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span> </span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">label_number</span>(<span class="at">scale_cut =</span> <span class="fu">cut_short_scale</span>())</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span> </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># change colour scale</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_distiller</span>(<span class="at">palette =</span> <span class="st">"RdBu"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Predicted flow"</span>,</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Observed flow"</span>) <span class="sc">+</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_plot_tufte</span>() <span class="sc">+</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title=</span><span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="region-quarto-template_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="288"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note: Colour represents the size of observed counts. Point size represents the size of population at origins.</p>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Unconstrained model predicted versus observed flows
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="constrained-models" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="constrained-models"><span class="header-section-number">6.1.2</span> Constrained models</h3>
+<p><em>Production-constrained model</em></p>
+<p>To address these inconsistencies, we turn to constrained models and first focus on the production-constrained model. This model assumes that we observe the total flows from each origin but not those arriving in each destination. So we can use information on the total number of outflows to constrain the model and distribute the total outflows proportionally to the population of destinations, and as before, inversely proportional to distance.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Production-constrained model</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># total outflow from each origin</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>outflow <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ltla_res_code) <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_outflow =</span> <span class="fu">sum</span>(count)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># merge outflows with original data</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(outflow, <span class="at">by =</span> <span class="st">"ltla_res_code"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># compute denominator for each origin</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ltla_res_code) <span class="sc">%&gt;%</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">kappa_production =</span> <span class="fu">sum</span>((population_d<span class="sc">^</span>gamma) <span class="sc">/</span> (distance_km<span class="sc">^</span>beta), </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                           <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co"># compute predicted flows</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> df <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">production_constrained_flow =</span> </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    total_outflow <span class="sc">*</span> ((population_d<span class="sc">^</span>gamma) <span class="sc">/</span> (distance_km<span class="sc">^</span>beta)) <span class="sc">/</span> </span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    kappa_production</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><em>Attraction-constrained model</em></p>
+<p>Alternatively, we could assume we only have data on the total number of flows arriving at each destination but we have no information on the number of flows being generated from each origin. In such situations, we can use an attraction-constrained model as it uses the known information on total inflows for individual destinations and a set of surrogate variables to represent the total number of flows from each origin.</p>
+<p><em>Doubly-constrained model</em></p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="region-quarto-template_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="statistical-gravity-models" class="level2" data-number="6.2">
 <h2 data-number="6.2" class="anchored" data-anchor-id="statistical-gravity-models"><span class="header-section-number">6.2</span> Statistical gravity models</h2>
+<section id="linear-regression-model" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="linear-regression-model"><span class="header-section-number">6.2.1</span> Linear regression model</h3>
+</section>
+<section id="log-linear-regression-model" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="log-linear-regression-model"><span class="header-section-number">6.2.2</span> Log-linear regression model</h3>
+</section>
+<section id="logistic-regression-model-with-aggregated-data" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="logistic-regression-model-with-aggregated-data"><span class="header-section-number">6.2.3</span> Logistic regression model with aggregated data</h3>
+</section>
+<section id="poisson-regression-model" class="level3" data-number="6.2.4">
+<h3 data-number="6.2.4" class="anchored" data-anchor-id="poisson-regression-model"><span class="header-section-number">6.2.4</span> Poisson regression model</h3>
+</section>
 </section>
 <section id="extensions" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="extensions"><span class="header-section-number">6.3</span> Extensions</h2>
-<section id="generalised-linear-mixed-gravity-models" class="level3" data-number="6.3.1">
-<h3 data-number="6.3.1" class="anchored" data-anchor-id="generalised-linear-mixed-gravity-models"><span class="header-section-number">6.3.1</span> Generalised linear mixed gravity models</h3>
+<section id="including-push-pull-factors" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="including-push-pull-factors"><span class="header-section-number">6.3.1</span> Including push-pull factors</h3>
 </section>
-<section id="machine-learning-gravity-models" class="level3" data-number="6.3.2">
-<h3 data-number="6.3.2" class="anchored" data-anchor-id="machine-learning-gravity-models"><span class="header-section-number">6.3.2</span> Machine learning gravity models</h3>
+<section id="negative-binomial-regression-model" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="negative-binomial-regression-model"><span class="header-section-number">6.3.2</span> Negative binomial regression model</h3>
+</section>
+<section id="generalised-linear-mixed-gravity-models" class="level3" data-number="6.3.3">
+<h3 data-number="6.3.3" class="anchored" data-anchor-id="generalised-linear-mixed-gravity-models"><span class="header-section-number">6.3.3</span> Generalised linear mixed gravity models</h3>
+</section>
+<section id="machine-learning-gravity-models" class="level3" data-number="6.3.4">
+<h3 data-number="6.3.4" class="anchored" data-anchor-id="machine-learning-gravity-models"><span class="header-section-number">6.3.4</span> Machine learning gravity models</h3>
 </section>
 </section>
 </section>
@@ -188,11 +397,23 @@ T_{ij} = G \frac{M_{i} M_{j}}{D^{k}_{ij} }
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">7 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-apariciocastro2023" class="csl-entry" role="listitem">
+Aparicio Castro, A., A. Wiśniowski, and F. Rowe (2023), <span>“<a href="https://doi.org/10.1093/jrsssa/qnad127">A Bayesian approach to estimate annual bilateral migration flows for South America using census data</a>,”</span> <em>Journal of the Royal Statistical Society Series A: Statistics in Society</em>, 187(2), 410–435.
+</div>
 <div id="ref-fotheringham_okelly1989" class="csl-entry" role="listitem">
 Fotheringham, A., and M. O’Kelly (eds.) (1989), <em>Spatial interaction models: Formulations and applications</em>, Kluwer Academic Publishers. Dordrechit.
 </div>
+<div id="ref-rowe2023urban" class="csl-entry" role="listitem">
+Rowe, F., A. Calafiore, D. Arribas-Bel, K. Samardzhiev, and M. Fleischmann (2023), <span>“Urban exodus? <span class="nocase">Understanding human mobility in Britain during the COVID-19 pandemic using Meta-Facebook data</span>,”</span> <em>Population, Space and Place</em>, 29(1), e2637.
+</div>
 <div id="ref-rowe2024" class="csl-entry" role="listitem">
 Rowe, F., R. Lovelace, and A. Dennett (2024), <span>“<a href="https://doi.org/10.4337/9781802203233.00019">Spatial interaction modelling: A manifesto</a>,”</span> Edward Elgar Publishing, pp. 177–196.
+</div>
+<div id="ref-rowe2022" class="csl-entry" role="listitem">
+Rowe, F., M. Mahony, and S. Tao (2022), <span>“<a href="https://doi.org/10.48550/ARXIV.2204.09792">Assessing machine learning algorithms for near-real time bus ridership prediction during extreme weather</a>.”</span>
+</div>
+<div id="ref-simini2021" class="csl-entry" role="listitem">
+Simini, F., G. Barlacchi, M. Luca, and L. Pappalardo (2021), <span>“<a href="https://doi.org/10.1038/s41467-021-26752-4">A Deep Gravity model for mobility flows generation</a>,”</span> <em>Nature Communications</em>, 12(1).
 </div>
 <div id="ref-wilson1971" class="csl-entry" role="listitem">
 Wilson, A.G. (1971), <span>“<a href="https://doi.org/10.1068/a030001">A Family of Spatial Interaction Models, and Associated Developments</a>,”</span> <em>Environment and Planning A: Economy and Space</em>, 3(1), 1–32.

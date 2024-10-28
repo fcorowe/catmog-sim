@@ -14,6 +14,9 @@ author:
       - name: 
         city: 
         country: 
+execute: 
+  echo: true
+  warning: false
 abstract: |
   This document is only a demo explaining how to use the template.
 keywords: [spatial interaction modelling, gravity modelling, flow data]
@@ -34,7 +37,7 @@ editor:
 ```{r}
 #| echo: false
 # clear the environment
-rm = list(ls())
+rm( list = ls( ) )
 ```
 
 # Introduction {#sec-intro}
@@ -111,66 +114,584 @@ advanced statistical frameworks, such as Generalised Linear Mixed Models
 # Context
 
 SIMs take various forms. Newtonian gravity models are probably the most
-widely known and used form of SIMs. Inspired by Newton’s law of gravity,
+widely known and used form of SIMs. Inspired by Newton's law of gravity,
 the basic gravity version of these models assumes that the spatial flows
 or interactions between an origin ($i$) and a destination $j$ is
 proportional to their masses ($M_{i}$ and $M_{j}$) and inversely
 proportional to their separation ($D_{ij}$). Locations are expected to
 interact in a positively reinforcing manner that is multiplicative of
 their masses, but to diminish with the intervening role of their
-separation. The separation between locations is often represented by a
-distance decay function and is measured in terms of the distance, cost
-or time involved in the interaction. Generally, the model includes a
-constant ($G$) ensuring that the expected flows do not exceed their
-respective observed counts, and a parameter ($k$) representing the
-deterring effect of geographical separation. The task is to estimate
-these parameters. Formally a gravity model can be expressed as:
+separation. The parameters $\mu$ and $\gamma$ reflect the proportional
+relationship between the masses and flows. The separation between
+locations is often represented by a distance decay function and is
+measured in terms of the distance, cost or time involved in the
+interaction. Generally, the model includes a constant ($\kappa$)
+ensuring that the expected flows do not exceed their respective observed
+counts, and a parameter ($\beta$) representing the deterring effect of
+geographical separation. The task is to estimate the parameters
+$\kappa$, $\mu$, $\gamma$ and $\beta$. Following @wilson1971, a gravity
+model can be expressed as:
 
 $$
-T_{ij} = G \frac{M_{i} M_{j}}{D^{k}_{ij} }
-$$
+T_{ij} = \kappa \frac{M^{\mu}_{i} M^{\gamma}_{j}}{D^{\beta}_{ij} }
+$$ {#eq-1}
 
 SIMs have three key inputs: (1) a matrix of flows between a set of
 origins and destinations; (2) a measure of separation between origins
 and destinations; and, (3) measures of masses at origin and destination
 locations. The literature usually considers a family of SIMs taking four
 forms which refers to various constraints placed on parameters of the
-model [@wilson1971]. There is an *unconstrained* version which is
-actually constrained to ensure that the total sum of the predicted flows
-from a gravity model be equal the total sum of the observed flows across
-all origins and destinations. Constrained versions are used to ensure
-that specific origin or destination observations are met. Three general
-formulations of constrained models are used: *production-constrained*,
-*attraction-constrained* and *doubly-constrained* models.
-*Production-constrained* versions are used to constrain a model so that
-the predicted flows emanating from individual origins is equal to their
-respective observed numbers. *Attraction-constrained* versions do the
-same but at individual destinations. *Doubly-constrained* versions
-combine these two sets of constraints to ensure predicted flows are
-equal to observed flows at both origins and destinations.
+model [@wilson1971]. There is an *unconstrained* version which offers a
+measure of spatial separation, assuming that there is no information on
+the number of flows originating from each origin to each destination.
+The number of flows is thus estimated via SIMs using surrogate factors,
+such as population at the origin and destiination. Constrained versions
+are used to ensure that specific origin or destination observations are
+met. Three general formulations of constrained models are used:
+*production-constrained*, *attraction-constrained* and
+*doubly-constrained* models. *Production-constrained* versions are used
+to constrain a model to origin factors so that the predicted flows
+emanating from individual origins are in proportion to the relative
+attractiveness of each destination. *Attraction-constrained* versions do
+the same but constrain models to destination factors so that the
+predicted flows terminating at each destination are in proportion to the
+relative attactiveness at individual origins. *Doubly-constrained*
+versions combine these two sets of constraints to ensure predicted flows
+are equal to observed flows are constrained by both origin and
+destination factors.
+
+Various modelling frameworks have been used to calibrate the parameters
+of SIMs. Originally, mathematical formulations were heavily used but
+these did not offer any ideas of uncertainty about the estimated
+parameters and were seen as deterministic. To mitigate this, statistical
+frameworks proliferated. A simple and widely used formulation is a
+linear model in which geographic flows are logged to meet the normality
+modelling assumptions, and OLS and maximum likelihood optimisation
+frameworks are used to estimate the model parameters. However, linear
+modelling has various constraints and cannot easily incorporate flow
+counts of zero, right-skewed distributions of flows and non-linear
+relationships between flows and the set of predictors. As result, more
+advanced modelling frameworks have been used to fit SIMs, including
+count data approaches such as Poison and Negative Binomial Models
+[@rowe2023urban], Generalised Linear Mixed Models [@apariciocastro2023]
+and more recently machine learning [@rowe2022] and deep learning models
+[@simini2021]. This computational notebook will provide a practical
+guide on how to implement these models using travel-to-work data for the
+UK. The next sections will first introduce the computational environment
+and data used for this purpose.
 
 # Computation environment {#sec-comenv}
 
 ```{r}
 #| warning: false
+#| echo: true
+# data management 
 library(tidyverse)
+# spatial data management
 library(sf)
+# generalised mixed linear modelling
 library(glmmTMB)
+# data visualisation
+library(scales)
+library(patchwork)
+source("../../code/style/data-visualisation_theme.R")
 ```
 
 # Data {#sec-data}
 
-Commuting or migration?
+We use an origin-destination matrix capturing travel-to-work commuting
+flows from the 2021 Census for England and Wales. The data provide
+estimates on usual residents aged 16 years and over and in employment
+before the Census week at the Lower Tier Local Authority (LTLA) level.
+The estimates capture the movement of people between their LTLA area of
+residence and work. The data are available in a long origin-destination
+pair format. The first seven columns contain the core components of a
+spatial interaction dataset, including code and names for origin and
+destination locations, and the population count moving between a
+origin-destination pair. The remainder of the dataset comprises the
+origin and destination attributes, including the total population count
+and population counts by socioeconomic categories. Columns 9 to 19
+contain the attributes at origins and columns 20 to 31 contain the
+attributes at destinations. Looking at the data frame vertically, the
+first row shown below displays the count of people who reported
+Hartlepool as their place of residence and work. The third row shows the
+count of people who were residing in Hartlepool but reported to travel
+to work in Middlesbrough.
+
+```{r}
+#| echo: true
+# read data
+df <- read_csv("../../data/output/sim_uk-travel-to-work_2021.csv") %>% 
+  # rename variables
+  rename(
+    ltla_res_code = "Lower tier local authorities code",
+    ltla_res_name = "Lower tier local authorities label",
+    ltla_work_code = "LTLA of workplace code",
+    ltla_work_name = "LTLA of workplace label",
+    ltla_work_id_code = "Place of work indicator (4 categories) code",
+    ltla_work_id_lbl = "Place of work indicator (4 categories) label",
+    count = "Count"
+  ) %>% 
+  # exclude the following observations:
+  dplyr::filter(!ltla_work_name %in% 
+                  c("Does not apply", 
+                    "Workplace is offshore installation", 
+                    "Workplace is outside the UK") ) %>% 
+  # exclude the following variables:
+  select( -c(ltla_work_id_code, ltla_work_id_lbl) ) %>% 
+  # exclude stayers
+  dplyr::filter(ltla_res_code != ltla_work_code) 
+head(df, n = 5 ) 
+```
 
 # Visualising spatial interaction data {#sec-visualising}
 
 # Estimating spatial interaction models {#sec-modelling}
 
-## Mathemathical gravity models
+This section focuses on how to calibrate spatial interaction models in
+the form of gravity models. It starts with the classical mathematical
+formulation, then moves to basic statistical frameworks and their
+extensions.
+
+## Mathematical gravity models
+
+### Unconstrained model
+
+We start by implementing the mathematical formulation of gravity models
+using @eq-1. We adopt the standard Newtonian formulation assuming that
+$\mu$ and $\gamma$ equal to 1 and $\beta$ to -2, and fit an
+*unconstrained* model. Recall here that this model assumes that no
+information on flows is available. We use the population at origin and
+destination LDAs and distance between LDA centroids in kilometers to
+define this model. To assess the model's predictive capacity, we
+graphically compare predicted flows *versus* observed flows. We focus on
+movements between LDAs, removing movements within LDAs with distance
+zero. A perfect model would product predicted flows displaying a perfect
+positive linear relationship with the orbserved flows. The figure below
+shows the unconstrained model results displaying little correspondence
+between the predicted and observed flows. The model predicts unrealistic
+flows of over 10 million which exceeds the size of the observed flows.
+This reflects the unconstrained nature of the model producing
+predictions based on distance, origin and destination only.
+
+::: {#fig-1}
+```{r, fig.width=3,fig.height=3}
+#| echo: true
+
+# Unconstrained model
+# assuming these parameters
+mu <- 1
+gamma <- 1
+beta <- 2
+kappa <- 1
+
+# using equation 1 to estimate unconstrained model
+df$predicted_flow <- round( kappa *
+  (df$population_o^mu * df$population_d^gamma) / (df$distance_km^beta) 
+  )
+
+# predicted versus observed flows
+df %>% 
+  # remove predictions
+  filter( distance_km != 0) %>% 
+  ggplot( aes( x = count, y = predicted_flow)) +
+  geom_point( alpha = .5, colour = "darkblue") +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change colour scale
+  #scale_colour_distiller(palette = "RdBu", direction = -1) +
+  labs(y = "Predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size = 11)
+        )
+```
+
+Note: Colour represents the size of observed counts. Point size
+represents the size of population at origins.
+
+Unconstrained model predicted versus observed flows
+:::
+
+### Constrained models
+
+*Production-constrained model*
+
+To address these inconsistencies, we turn to constrained models and
+first focus on the production-constrained model. This model assumes that
+we observe the total flows from each origin but not those arriving in
+each destination. So we can use information on the total number of
+outflows to constrain the model and distribute the total outflows
+proportionally to the population of destinations, and as before,
+inversely proportional to distance.
+
+```{r}
+#| echo: true
+
+# Production-constrained model
+# total outflow from each origin
+outflow <- df %>%
+  group_by(ltla_res_code) %>%
+  summarize(total_outflow = sum(count)) %>% 
+  ungroup()
+
+# merge outflows with original data
+df <- df %>%
+  left_join(outflow, by = "ltla_res_code")
+
+# compute denominator for each origin
+df <- df %>%
+  group_by(ltla_res_code) %>%
+  mutate(
+    kappa_production = 
+      sum((population_d^gamma) / (distance_km^beta), 
+                           na.rm = TRUE)) %>%
+  ungroup()
+
+# compute predicted flows
+df <- df %>% mutate(
+  production_constrained_flow = 
+    total_outflow * ((population_d^gamma) / (distance_km^beta)) / 
+    kappa_production
+  )
+
+
+```
+
+*Attraction-constrained model*
+
+Alternatively, we could assume we only have data on the total number of
+flows arriving at each destination but we have no information on the
+number of flows being generated from each origin. In such situations, we
+can use an attraction-constrained model as it uses the known information
+on total inflows for individual destinations and a set of surrogate
+variables to represent the total number of flows from each origin.
+
+```{r}
+#| echo: true
+
+# Attraction-constrained model
+# total inflow from each origin
+inflow <- df %>%
+  group_by(ltla_work_code ) %>%
+  summarize(total_inflow = sum(count)) %>% 
+  ungroup()
+
+# merge inflows with original data
+df <- df %>%
+  left_join(inflow, by = "ltla_work_code")
+
+# compute denominator for each destination
+df <- df %>%
+  group_by(ltla_work_code) %>%
+  mutate(
+    kappa_attraction = 
+      sum((population_o^mu) / (distance_km^beta))) %>%
+  ungroup()
+
+# compute predicted flows
+df <- df %>% mutate(
+  attraction_constrained_flow =
+    total_inflow * ((population_o^mu) / (distance_km^beta)) / 
+    kappa_attraction
+  )
+```
+
+*Doubly-constrained model*
+
+We can also adjust the number of flows so that both total outflows from
+each origin and total inflows to each destination match observed totals.
+This model requires an iterative solution to meet these constraints. To
+this end, we first set the parameters for the algorithm to converge to a
+solution i.e. tolerance, maximum iterations (max_iter) and iteration
+steps (iter). Intuitively the algorithm iteratively adjust the flows by
+first applying the production constrain, and subsequently the attraction
+constrain in a similar manner as used above. It then assesses the
+difference between total predicted and observed flows. It stops when
+this difference is smaller than the established tolerance parameter. The
+algorithm uses the unconstrained model predicted flow as a starting
+point for the iterative process.
+
+```{r}
+#| echo: true
+
+# Doubly-constrained model
+# set parameters for iterations
+tolerance <- 1e-6
+max_iter <- 1000
+iter <- 1
+converged <- FALSE
+
+# iteratively adjust flows to satisfy both constraints
+while (!converged && iter <= max_iter) {
+  # Step 1: apply production constraint for each origin
+  df <- df %>%
+    group_by(ltla_res_code ) %>%
+    mutate(
+      predicted_flow = 
+        predicted_flow * (total_outflow / sum(predicted_flow))) %>%
+    ungroup()
+  
+  # Step 2: apply attraction constraint for each destination
+  df <- df %>%
+    group_by(ltla_work_code) %>%
+    mutate(
+      predicted_flow = 
+        predicted_flow * (total_inflow / sum(predicted_flow))) %>%
+    ungroup()
+
+  # assess convergence comparing row sums of predicted and observed flows
+  origin_check <- df %>%
+    group_by(ltla_res_code) %>%
+    summarize(
+      total_predicted = 
+        sum(predicted_flow), total_observed = unique(total_outflow)
+      ) %>%
+    mutate(
+      difference = 
+        abs(total_predicted - total_observed))
+
+  destination_check <- df %>%
+    group_by(ltla_work_code) %>%
+    summarize(
+      total_predicted = 
+        sum(predicted_flow), total_observed = unique(total_inflow)
+      ) %>%
+    mutate(
+      difference = abs(total_predicted - total_observed)
+      )
+
+  max_difference <- max(c(origin_check$difference, 
+                          destination_check$difference))
+
+  # check if the maximum difference is below the tolerance level
+  if (max_difference < tolerance) {
+    converged <- TRUE
+  } else {
+    iter <- iter + 1
+  }
+}
+
+```
+
+We can visualise the predictions from the three constrained models.
+While the predicted flows are closer to the observed flows compared to
+the unconstrained model outputs, large discrepancies still exist, with
+differences of over 10 thousand. So far, we have assumed that the
+parameters $\mu$ and $\gamma$ that moderate the relationship between
+commuting flows and population counts at origins and destinations is
+$1$, and that the $\beta$ distance decay parameter is $2$. Yet, these
+are arbitrary numbers and need to be empirically estimated. We will do
+this by using statistical models.
+
+```{r}
+#| echo: true
+
+# predicted versus observed flows
+production_constrained_plot <- df %>% 
+  # remove predictions
+  filter( distance_km != 0) %>% 
+  ggplot( aes( x = count, y = production_constrained_flow)) +
+  geom_point( alpha = .8, aes(colour = count, 
+                              size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change colour scale
+  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  labs(y = "Population-constrained \n predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+attraction_constrained_plot <- df %>% 
+  # remove predictions
+  filter( distance_km != 0) %>% 
+  ggplot( aes( x = count, y = attraction_constrained_flow)) +
+  geom_point( alpha = .8, aes(colour = count, 
+                              size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change colour scale
+  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  labs(y = "Attraction-constrained \n predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+doubly_constrained_plot <- df %>% 
+  # remove predictions
+  filter( distance_km != 0) %>% 
+  ggplot( aes( x = count, y = predicted_flow)) +
+  geom_point( alpha = .8, aes(colour = count, 
+                              size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change colour scale
+  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  labs(y = "Doubly-constrained \n predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+```
+
+```{r}
+( production_constrained_plot + attraction_constrained_plot + doubly_constrained_plot)
+```
 
 ## Statistical gravity models
 
+Use the following structure: describe the intuition of the model
+specification, and provide some interpretation of the results
+
+### Linear regression model
+
+```{r}
+lrm <- lm(count ~ population_o + population_d + distance_km,
+          data = df)
+summary(lrm)
+```
+
+### Log-linear regression model
+
+```{r}
+loglrm <- lm( log(count) ~ log(population_o) + log(population_d) + log(distance_km),
+          data = df)
+summary(loglrm)
+```
+
+### Logistic regression model with aggregated data
+
+### Poisson regression model
+
+```{r}
+poissonrm <- glm(count ~ population_o + population_d + distance_km,
+                 data = df,
+                 family = poisson)
+summary(poissonrm)
+```
+
+```{r}
+df$lrm_predicted_flow <- predict(lrm, type = "response")
+df$loglrm_predicted_flow <- predict(loglrm, type = "response")
+df$poissonrm_predicted_flow <- predict(poissonrm, type = "response")
+
+# predicted versus observed flows
+
+# linear regression model (lrm)
+lrm_plot <- df %>% 
+  # remove predictions
+  ggplot( aes( x = count, y = lrm_predicted_flow)) +
+  geom_point( alpha = .8, aes(colour = count, 
+                              size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change colour scale
+  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  labs(y = "LRM predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+# log-linear regression model (loglrm)
+loglrm_plot <- df %>% 
+  # remove predictions
+  ggplot( aes( x = count, y = exp(loglrm_predicted_flow) )) +
+  geom_point( alpha = .8, aes(colour = count, 
+                              size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change colour scale
+  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  labs(y = "Log LRM predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+# Poisson regression model (poissonrm)
+poissonrm_plot <- df %>% 
+  # remove predictions
+  ggplot( aes( x = count, y = poissonrm_predicted_flow)) +
+  geom_point( alpha = .8, aes(colour = count, 
+                              size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change colour scale
+  scale_colour_distiller(palette = "RdBu", direction = -1) +
+  labs(y = "Poisson RM predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+lrm_plot + loglrm_plot + poissonrm_plot
+```
+
 ## Extensions
+
+### Including push-pull factors
+
+### Negative binomial regression model
 
 ### Generalised linear mixed gravity models
 

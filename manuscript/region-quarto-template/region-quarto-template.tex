@@ -45,29 +45,55 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \setcounter{secnumdepth}{5}
 % Make \paragraph and \subparagraph free-standing
-\makeatletter
 \ifx\paragraph\undefined\else
   \let\oldparagraph\paragraph
-  \renewcommand{\paragraph}{
-    \@ifstar
-      \xxxParagraphStar
-      \xxxParagraphNoStar
-  }
-  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
-  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
 \fi
 \ifx\subparagraph\undefined\else
   \let\oldsubparagraph\subparagraph
-  \renewcommand{\subparagraph}{
-    \@ifstar
-      \xxxSubParagraphStar
-      \xxxSubParagraphNoStar
-  }
-  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
-  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
 \fi
-\makeatother
 
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{241,243,245}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.40,0.45,0.13}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\BuiltInTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\ExtensionTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.28,0.35,0.67}{#1}}
+\newcommand{\ImportTok}[1]{\textcolor[rgb]{0.00,0.46,0.62}{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\NormalTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.68,0.00,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{\textcolor[rgb]{0.00,0.23,0.31}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.07,0.07,0.07}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.13,0.47,0.30}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.37,0.37,0.37}{\textit{#1}}}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
@@ -137,7 +163,6 @@
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
 \makeatother
-
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -158,7 +183,6 @@ data},
   citecolor={Blue},
   urlcolor={blue},
   pdfcreator={LaTeX via pandoc}}
-
 
 
 
@@ -214,7 +238,6 @@ Blinded\parnote{}}
 \begin{abstract}
 This document is only a demo explaining how to use the template.
 \end{abstract}
-
 
 \section{Introduction}\label{sec-intro}
 
@@ -299,17 +322,20 @@ proportional to their masses (\(M_{i}\) and \(M_{j}\)) and inversely
 proportional to their separation (\(D_{ij}\)). Locations are expected to
 interact in a positively reinforcing manner that is multiplicative of
 their masses, but to diminish with the intervening role of their
-separation. The separation between locations is often represented by a
-distance decay function and is measured in terms of the distance, cost
-or time involved in the interaction. Generally, the model includes a
-constant (\(G\)) ensuring that the expected flows do not exceed their
-respective observed counts, and a parameter (\(k\)) representing the
-deterring effect of geographical separation. The task is to estimate
-these parameters. Formally a gravity model can be expressed as:
+separation. The parameters \(\mu\) and \(\gamma\) reflect the
+proportional relationship between the masses and flows. The separation
+between locations is often represented by a distance decay function and
+is measured in terms of the distance, cost or time involved in the
+interaction. Generally, the model includes a constant (\(\kappa\))
+ensuring that the expected flows do not exceed their respective observed
+counts, and a parameter (\(\beta\)) representing the deterring effect of
+geographical separation. The task is to estimate the parameters
+\(\kappa\), \(\mu\), \(\gamma\) and \(\beta\). Following
+\citet{wilson1971}, a gravity model can be expressed as:
 
-\[
-T_{ij} = G \frac{M_{i} M_{j}}{D^{k}_{ij} }
-\]
+\begin{equation}\phantomsection\label{eq-1}{
+T_{ij} = \kappa \frac{M^{\mu}_{i} M^{\gamma}_{j}}{D^{\beta}_{ij} }
+}\end{equation}
 
 SIMs have three key inputs: (1) a matrix of flows between a set of
 origins and destinations; (2) a measure of separation between origins
@@ -317,37 +343,557 @@ and destinations; and, (3) measures of masses at origin and destination
 locations. The literature usually considers a family of SIMs taking four
 forms which refers to various constraints placed on parameters of the
 model \citep{wilson1971}. There is an \emph{unconstrained} version which
-is actually constrained to ensure that the total sum of the predicted
-flows from a gravity model be equal the total sum of the observed flows
-across all origins and destinations. Constrained versions are used to
-ensure that specific origin or destination observations are met. Three
-general formulations of constrained models are used:
-\emph{production-constrained}, \emph{attraction-constrained} and
-\emph{doubly-constrained} models. \emph{Production-constrained} versions
-are used to constrain a model so that the predicted flows emanating from
-individual origins is equal to their respective observed numbers.
-\emph{Attraction-constrained} versions do the same but at individual
-destinations. \emph{Doubly-constrained} versions combine these two sets
-of constraints to ensure predicted flows are equal to observed flows at
-both origins and destinations.
+offers a measure of spatial separation, assuming that there is no
+information on the number of flows originating from each origin to each
+destination. The number of flows is thus estimated via SIMs using
+surrogate factors, such as population at the origin and destiination.
+Constrained versions are used to ensure that specific origin or
+destination observations are met. Three general formulations of
+constrained models are used: \emph{production-constrained},
+\emph{attraction-constrained} and \emph{doubly-constrained} models.
+\emph{Production-constrained} versions are used to constrain a model to
+origin factors so that the predicted flows emanating from individual
+origins are in proportion to the relative attractiveness of each
+destination. \emph{Attraction-constrained} versions do the same but
+constrain models to destination factors so that the predicted flows
+terminating at each destination are in proportion to the relative
+attactiveness at individual origins. \emph{Doubly-constrained} versions
+combine these two sets of constraints to ensure predicted flows are
+equal to observed flows are constrained by both origin and destination
+factors.
+
+Various modelling frameworks have been used to calibrate the parameters
+of SIMs. Originally, mathematical formulations were heavily used but
+these did not offer any ideas of uncertainty about the estimated
+parameters and were seen as deterministic. To mitigate this, statistical
+frameworks proliferated. A simple and widely used formulation is a
+linear model in which geographic flows are logged to meet the normality
+modelling assumptions, and OLS and maximum likelihood optimisation
+frameworks are used to estimate the model parameters. However, linear
+modelling has various constraints and cannot easily incorporate flow
+counts of zero, right-skewed distributions of flows and non-linear
+relationships between flows and the set of predictors. As result, more
+advanced modelling frameworks have been used to fit SIMs, including
+count data approaches such as Poison and Negative Binomial Models
+\citep{rowe2023urban}, Generalised Linear Mixed Models
+\citep{apariciocastro2023} and more recently machine learning
+\citep{rowe2022} and deep learning models \citep{simini2021}. This
+computational notebook will provide a practical guide on how to
+implement these models using travel-to-work data for the UK. The next
+sections will first introduce the computational environment and data
+used for this purpose.
 
 \section{Computation environment}\label{sec-comenv}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# data management }
+\FunctionTok{library}\NormalTok{(tidyverse)}
+\CommentTok{\# spatial data management}
+\FunctionTok{library}\NormalTok{(sf)}
+\CommentTok{\# generalised mixed linear modelling}
+\FunctionTok{library}\NormalTok{(glmmTMB)}
+\CommentTok{\# data visualisation}
+\FunctionTok{library}\NormalTok{(scales)}
+\FunctionTok{library}\NormalTok{(patchwork)}
+\FunctionTok{source}\NormalTok{(}\StringTok{"../../code/style/data{-}visualisation\_theme.R"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
 \section{Data}\label{sec-data}
 
-Commuting or migration?
+We use an origin-destination matrix capturing travel-to-work commuting
+flows from the 2021 Census for England and Wales. The data provide
+estimates on usual residents aged 16 years and over and in employment
+before the Census week at the Lower Tier Local Authority (LTLA) level.
+The estimates capture the movement of people between their LTLA area of
+residence and work. The data are available in a long origin-destination
+pair format. The first seven columns contain the core components of a
+spatial interaction dataset, including code and names for origin and
+destination locations, and the population count moving between a
+origin-destination pair. The remainder of the dataset comprises the
+origin and destination attributes, including the total population count
+and population counts by socioeconomic categories. Columns 9 to 19
+contain the attributes at origins and columns 20 to 31 contain the
+attributes at destinations. Looking at the data frame vertically, the
+first row shown below displays the count of people who reported
+Hartlepool as their place of residence and work. The third row shows the
+count of people who were residing in Hartlepool but reported to travel
+to work in Middlesbrough.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# read data}
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{read\_csv}\NormalTok{(}\StringTok{"../../data/output/sim\_uk{-}travel{-}to{-}work\_2021.csv"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# rename variables}
+  \FunctionTok{rename}\NormalTok{(}
+    \AttributeTok{ltla\_res\_code =} \StringTok{"Lower tier local authorities code"}\NormalTok{,}
+    \AttributeTok{ltla\_res\_name =} \StringTok{"Lower tier local authorities label"}\NormalTok{,}
+    \AttributeTok{ltla\_work\_code =} \StringTok{"LTLA of workplace code"}\NormalTok{,}
+    \AttributeTok{ltla\_work\_name =} \StringTok{"LTLA of workplace label"}\NormalTok{,}
+    \AttributeTok{ltla\_work\_id\_code =} \StringTok{"Place of work indicator (4 categories) code"}\NormalTok{,}
+    \AttributeTok{ltla\_work\_id\_lbl =} \StringTok{"Place of work indicator (4 categories) label"}\NormalTok{,}
+    \AttributeTok{count =} \StringTok{"Count"}
+\NormalTok{  ) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# exclude the following observations:}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(}\SpecialCharTok{!}\NormalTok{ltla\_work\_name }\SpecialCharTok{\%in\%} 
+                  \FunctionTok{c}\NormalTok{(}\StringTok{"Does not apply"}\NormalTok{, }
+                    \StringTok{"Workplace is offshore installation"}\NormalTok{, }
+                    \StringTok{"Workplace is outside the UK"}\NormalTok{) ) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# exclude the following variables:}
+  \FunctionTok{select}\NormalTok{( }\SpecialCharTok{{-}}\FunctionTok{c}\NormalTok{(ltla\_work\_id\_code, ltla\_work\_id\_lbl) ) }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# exclude stayers}
+\NormalTok{  dplyr}\SpecialCharTok{::}\FunctionTok{filter}\NormalTok{(ltla\_res\_code }\SpecialCharTok{!=}\NormalTok{ ltla\_work\_code) }
+\FunctionTok{head}\NormalTok{(df, }\AttributeTok{n =} \DecValTok{5}\NormalTok{ ) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+# A tibble: 5 x 31
+  ltla_res_code ltla_res_name ltla_work_code ltla_work_name   count population_o
+  <chr>         <chr>         <chr>          <chr>            <dbl>        <dbl>
+1 E06000001     Hartlepool    E06000002      Middlesbrough     1500        92338
+2 E06000001     Hartlepool    E06000003      Redcar and Clev~   671        92338
+3 E06000001     Hartlepool    E06000004      Stockton-on-Tees  4240        92338
+4 E06000001     Hartlepool    E06000005      Darlington         398        92338
+5 E06000001     Hartlepool    E06000007      Warrington           2        92338
+# i 25 more variables: higher_managerial_administrative_professional_o <dbl>,
+#   lower_managerial_administrative_professional_o <dbl>, intermediate_o <dbl>,
+#   small_employers_own_account_o <dbl>, lower_supervisory_technical_o <dbl>,
+#   semi_routine_o <dbl>, routine_o <dbl>, never_worked_unemployed_o <dbl>,
+#   ft_students_o <dbl>, no_qualifications_o <dbl>, level4_o <dbl>,
+#   population_d <dbl>, higher_managerial_administrative_professional_d <dbl>,
+#   lower_managerial_administrative_professional_d <dbl>, ...
+\end{verbatim}
 
 \section{Visualising spatial interaction data}\label{sec-visualising}
 
 \section{Estimating spatial interaction models}\label{sec-modelling}
 
-\subsection{Mathemathical gravity
-models}\label{mathemathical-gravity-models}
+This section focuses on how to calibrate spatial interaction models in
+the form of gravity models. It starts with the classical mathematical
+formulation, then moves to basic statistical frameworks and their
+extensions.
+
+\subsection{Mathematical gravity
+models}\label{mathematical-gravity-models}
+
+\subsubsection{Unconstrained model}\label{unconstrained-model}
+
+We start by implementing the mathematical formulation of gravity models
+using Equation~\ref{eq-1}. We adopt the standard Newtonian formulation
+assuming that \(\mu\) and \(\gamma\) equal to 1 and \(\beta\) to -2, and
+fit an \emph{unconstrained} model. Recall here that this model assumes
+that no information on flows is available. We use the population at
+origin and destination LDAs and distance between LDA centroids in
+kilometers to define this model. To assess the model's predictive
+capacity, we graphically compare predicted flows \emph{versus} observed
+flows. We focus on movements between LDAs, removing movements within
+LDAs with distance zero. A perfect model would product predicted flows
+displaying a perfect positive linear relationship with the orbserved
+flows. The figure below shows the unconstrained model results displaying
+little correspondence between the predicted and observed flows. The
+model predicts unrealistic flows of over 10 million which exceeds the
+size of the observed flows. This reflects the unconstrained nature of
+the model producing predictions based on distance, origin and
+destination only.
+
+\begin{figure}
+
+\centering{
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Unconstrained model}
+\CommentTok{\# assuming these parameters}
+\NormalTok{mu }\OtherTok{\textless{}{-}} \DecValTok{1}
+\NormalTok{gamma }\OtherTok{\textless{}{-}} \DecValTok{1}
+\NormalTok{beta }\OtherTok{\textless{}{-}} \DecValTok{2}
+\NormalTok{kappa }\OtherTok{\textless{}{-}} \DecValTok{1}
+
+\CommentTok{\# using equation 1 to estimate unconstrained model}
+\NormalTok{df}\SpecialCharTok{$}\NormalTok{predicted\_flow }\OtherTok{\textless{}{-}} \FunctionTok{round}\NormalTok{( kappa }\SpecialCharTok{*}
+\NormalTok{  (df}\SpecialCharTok{$}\NormalTok{population\_o}\SpecialCharTok{\^{}}\NormalTok{mu }\SpecialCharTok{*}\NormalTok{ df}\SpecialCharTok{$}\NormalTok{population\_d}\SpecialCharTok{\^{}}\NormalTok{gamma) }\SpecialCharTok{/}\NormalTok{ (df}\SpecialCharTok{$}\NormalTok{distance\_km}\SpecialCharTok{\^{}}\NormalTok{beta) }
+\NormalTok{  )}
+
+\CommentTok{\# predicted versus observed flows}
+\NormalTok{df }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# remove predictions}
+  \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ predicted\_flow)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
+                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \CommentTok{\# change axis label to a shorthand}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \CommentTok{\# change colour scale}
+  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Predicted flow"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{,}
+        \AttributeTok{axis.text.y =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.title=}\FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{11}\NormalTok{)}
+\NormalTok{        )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{region-quarto-template_files/figure-pdf/unnamed-chunk-4-1.pdf}
+
+Note: Colour represents the size of observed counts. Point size
+represents the size of population at origins.
+
+}
+
+\caption{\label{fig-1}Unconstrained model predicted versus observed
+flows}
+
+\end{figure}%
+
+\subsubsection{Constrained models}\label{constrained-models}
+
+\emph{Production-constrained model}
+
+To address these inconsistencies, we turn to constrained models and
+first focus on the production-constrained model. This model assumes that
+we observe the total flows from each origin but not those arriving in
+each destination. So we can use information on the total number of
+outflows to constrain the model and distribute the total outflows
+proportionally to the population of destinations, and as before,
+inversely proportional to distance.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Production{-}constrained model}
+\CommentTok{\# total outflow from each origin}
+\NormalTok{outflow }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(ltla\_res\_code) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}\AttributeTok{total\_outflow =} \FunctionTok{sum}\NormalTok{(count)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ungroup}\NormalTok{()}
+
+\CommentTok{\# merge outflows with original data}
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{left\_join}\NormalTok{(outflow, }\AttributeTok{by =} \StringTok{"ltla\_res\_code"}\NormalTok{)}
+
+\CommentTok{\# compute denominator for each origin}
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(ltla\_res\_code) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{kappa\_production =} 
+      \FunctionTok{sum}\NormalTok{((population\_d}\SpecialCharTok{\^{}}\NormalTok{gamma) }\SpecialCharTok{/}\NormalTok{ (distance\_km}\SpecialCharTok{\^{}}\NormalTok{beta), }
+                           \AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ungroup}\NormalTok{()}
+
+\CommentTok{\# compute predicted flows}
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}
+  \AttributeTok{production\_constrained\_flow =} 
+\NormalTok{    total\_outflow }\SpecialCharTok{*}\NormalTok{ ((population\_d}\SpecialCharTok{\^{}}\NormalTok{gamma) }\SpecialCharTok{/}\NormalTok{ (distance\_km}\SpecialCharTok{\^{}}\NormalTok{beta)) }\SpecialCharTok{/} 
+\NormalTok{    kappa\_production}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\emph{Attraction-constrained model}
+
+Alternatively, we could assume we only have data on the total number of
+flows arriving at each destination but we have no information on the
+number of flows being generated from each origin. In such situations, we
+can use an attraction-constrained model as it uses the known information
+on total inflows for individual destinations and a set of surrogate
+variables to represent the total number of flows from each origin.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Attraction{-}constrained model}
+\CommentTok{\# total inflow from each origin}
+\NormalTok{inflow }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(ltla\_work\_code ) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{summarize}\NormalTok{(}\AttributeTok{total\_inflow =} \FunctionTok{sum}\NormalTok{(count)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ungroup}\NormalTok{()}
+
+\CommentTok{\# merge inflows with original data}
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{left\_join}\NormalTok{(inflow, }\AttributeTok{by =} \StringTok{"ltla\_work\_code"}\NormalTok{)}
+
+\CommentTok{\# compute denominator for each destination}
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{group\_by}\NormalTok{(ltla\_work\_code) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{kappa\_attraction =} 
+      \FunctionTok{sum}\NormalTok{((population\_o}\SpecialCharTok{\^{}}\NormalTok{mu) }\SpecialCharTok{/}\NormalTok{ (distance\_km}\SpecialCharTok{\^{}}\NormalTok{beta))) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{ungroup}\NormalTok{()}
+
+\CommentTok{\# compute predicted flows}
+\NormalTok{df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}
+  \AttributeTok{attraction\_constrained\_flow =}
+\NormalTok{    total\_inflow }\SpecialCharTok{*}\NormalTok{ ((population\_o}\SpecialCharTok{\^{}}\NormalTok{mu) }\SpecialCharTok{/}\NormalTok{ (distance\_km}\SpecialCharTok{\^{}}\NormalTok{beta)) }\SpecialCharTok{/} 
+\NormalTok{    kappa\_attraction}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\emph{Doubly-constrained model}
+
+We can also adjust the number of flows so that both total outflows from
+each origin and total inflows to each destination match observed totals.
+This model requires an iterative solution to meet these constraints. To
+this end, we first set the parameters for the algorithm to converge to a
+solution i.e.~tolerance, maximum iterations (max\_iter) and iteration
+steps (iter). Intuitively the algorithm iteratively adjust the flows by
+first applying the production constrain, and subsequently the attraction
+constrain in a similar manner as used above. It then assesses the
+difference between total predicted and observed flows. It stops when
+this difference is smaller than the established tolerance parameter. The
+algorithm uses the unconstrained model predicted flow as a starting
+point for the iterative process.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Doubly{-}constrained model}
+\CommentTok{\# set parameters for iterations}
+\NormalTok{tolerance }\OtherTok{\textless{}{-}} \FloatTok{1e{-}6}
+\NormalTok{max\_iter }\OtherTok{\textless{}{-}} \DecValTok{1000}
+\NormalTok{iter }\OtherTok{\textless{}{-}} \DecValTok{1}
+\NormalTok{converged }\OtherTok{\textless{}{-}} \ConstantTok{FALSE}
+
+\CommentTok{\# iteratively adjust flows to satisfy both constraints}
+\ControlFlowTok{while}\NormalTok{ (}\SpecialCharTok{!}\NormalTok{converged }\SpecialCharTok{\&\&}\NormalTok{ iter }\SpecialCharTok{\textless{}=}\NormalTok{ max\_iter) \{}
+  \CommentTok{\# Step 1: apply production constraint for each origin}
+\NormalTok{  df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(ltla\_res\_code ) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}
+      \AttributeTok{predicted\_flow =} 
+\NormalTok{        predicted\_flow }\SpecialCharTok{*}\NormalTok{ (total\_outflow }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(predicted\_flow))) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{ungroup}\NormalTok{()}
+  
+  \CommentTok{\# Step 2: apply attraction constraint for each destination}
+\NormalTok{  df }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(ltla\_work\_code) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}
+      \AttributeTok{predicted\_flow =} 
+\NormalTok{        predicted\_flow }\SpecialCharTok{*}\NormalTok{ (total\_inflow }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(predicted\_flow))) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{ungroup}\NormalTok{()}
+
+  \CommentTok{\# assess convergence comparing row sums of predicted and observed flows}
+\NormalTok{  origin\_check }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(ltla\_res\_code) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{summarize}\NormalTok{(}
+      \AttributeTok{total\_predicted =} 
+        \FunctionTok{sum}\NormalTok{(predicted\_flow), }\AttributeTok{total\_observed =} \FunctionTok{unique}\NormalTok{(total\_outflow)}
+\NormalTok{      ) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}
+      \AttributeTok{difference =} 
+        \FunctionTok{abs}\NormalTok{(total\_predicted }\SpecialCharTok{{-}}\NormalTok{ total\_observed))}
+
+\NormalTok{  destination\_check }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{group\_by}\NormalTok{(ltla\_work\_code) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{summarize}\NormalTok{(}
+      \AttributeTok{total\_predicted =} 
+        \FunctionTok{sum}\NormalTok{(predicted\_flow), }\AttributeTok{total\_observed =} \FunctionTok{unique}\NormalTok{(total\_inflow)}
+\NormalTok{      ) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}
+      \AttributeTok{difference =} \FunctionTok{abs}\NormalTok{(total\_predicted }\SpecialCharTok{{-}}\NormalTok{ total\_observed)}
+\NormalTok{      )}
+
+\NormalTok{  max\_difference }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}\FunctionTok{c}\NormalTok{(origin\_check}\SpecialCharTok{$}\NormalTok{difference, }
+\NormalTok{                          destination\_check}\SpecialCharTok{$}\NormalTok{difference))}
+
+  \CommentTok{\# check if the maximum difference is below the tolerance level}
+  \ControlFlowTok{if}\NormalTok{ (max\_difference }\SpecialCharTok{\textless{}}\NormalTok{ tolerance) \{}
+\NormalTok{    converged }\OtherTok{\textless{}{-}} \ConstantTok{TRUE}
+\NormalTok{  \} }\ControlFlowTok{else}\NormalTok{ \{}
+\NormalTok{    iter }\OtherTok{\textless{}{-}}\NormalTok{ iter }\SpecialCharTok{+} \DecValTok{1}
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+We can visualise the predictions from the three constrained models.
+While the predicted flows are closer to the observed flows compared to
+the unconstrained model outputs, large discrepancies still exist, with
+differences of over 10 thousand. So far, we have assumed that the
+parameters \(\mu\) and \(\gamma\) that moderate the relationship between
+commuting flows and population counts at origins and destinations is
+\(1\), and that the \(\beta\) distance decay parameter is \(2\). Yet,
+these are arbitrary numbers and need to be empirically estimated. We
+will do this by using statistical models.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# predicted versus observed flows}
+\NormalTok{production\_constrained\_plot }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# remove predictions}
+  \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ production\_constrained\_flow)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
+                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \CommentTok{\# change axis label to a shorthand}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \CommentTok{\# change colour scale}
+  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Population{-}constrained }\SpecialCharTok{\textbackslash{}n}\StringTok{ predicted flow"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{,}
+        \AttributeTok{axis.text.y =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.title=}\FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size=}\DecValTok{11}\NormalTok{)}
+\NormalTok{        )}
+
+\NormalTok{attraction\_constrained\_plot }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# remove predictions}
+  \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ attraction\_constrained\_flow)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
+                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \CommentTok{\# change axis label to a shorthand}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \CommentTok{\# change colour scale}
+  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Attraction{-}constrained }\SpecialCharTok{\textbackslash{}n}\StringTok{ predicted flow"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{,}
+        \AttributeTok{axis.text.y =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.title=}\FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size=}\DecValTok{11}\NormalTok{)}
+\NormalTok{        )}
+
+\NormalTok{doubly\_constrained\_plot }\OtherTok{\textless{}{-}}\NormalTok{ df }\SpecialCharTok{\%\textgreater{}\%} 
+  \CommentTok{\# remove predictions}
+  \FunctionTok{filter}\NormalTok{( distance\_km }\SpecialCharTok{!=} \DecValTok{0}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{( }\FunctionTok{aes}\NormalTok{( }\AttributeTok{x =}\NormalTok{ count, }\AttributeTok{y =}\NormalTok{ predicted\_flow)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_point}\NormalTok{( }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{8}\NormalTok{, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{colour =}\NormalTok{ count, }
+                              \AttributeTok{size =} \FunctionTok{abs}\NormalTok{(population\_o }\SpecialCharTok{/} \FloatTok{1e1}\NormalTok{)) ) }\SpecialCharTok{+}
+  \CommentTok{\# change axis label to a shorthand}
+  \FunctionTok{scale\_y\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \FunctionTok{scale\_x\_continuous}\NormalTok{(}
+    \AttributeTok{labels =} \FunctionTok{label\_number}\NormalTok{(}\AttributeTok{scale\_cut =} \FunctionTok{cut\_short\_scale}\NormalTok{())}
+\NormalTok{    ) }\SpecialCharTok{+} 
+  \CommentTok{\# change colour scale}
+  \FunctionTok{scale\_colour\_distiller}\NormalTok{(}\AttributeTok{palette =} \StringTok{"RdBu"}\NormalTok{, }\AttributeTok{direction =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Doubly{-}constrained }\SpecialCharTok{\textbackslash{}n}\StringTok{ predicted flow"}\NormalTok{,}
+       \AttributeTok{x =} \StringTok{"Observed flow"}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_plot\_tufte}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{,}
+        \AttributeTok{axis.text.y =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size =} \DecValTok{9}\NormalTok{),}
+        \AttributeTok{axis.title=}\FunctionTok{element\_text}\NormalTok{(}\AttributeTok{size=}\DecValTok{11}\NormalTok{)}
+\NormalTok{        )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{region-quarto-template_files/figure-pdf/unnamed-chunk-9-1.pdf}
 
 \subsection{Statistical gravity
 models}\label{statistical-gravity-models}
 
+\subsubsection{Linear regression model}\label{linear-regression-model}
+
+\begin{verbatim}
+
+Call:
+lm(formula = count ~ population_o + population_d + distance_km, 
+    data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+ -384.0  -105.2   -77.1   -55.9 22872.3 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.933e+00  7.378e+00   0.262    0.793    
+population_o 2.167e-04  1.720e-05  12.592   <2e-16 ***
+population_d 2.382e-04  1.713e-05  13.907   <2e-16 ***
+distance_km  4.726e-04  4.974e-04   0.950    0.342    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 607.5 on 69648 degrees of freedom
+Multiple R-squared:  0.004866,  Adjusted R-squared:  0.004823 
+F-statistic: 113.5 on 3 and 69648 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\subsubsection{Log-linear regression
+model}\label{log-linear-regression-model}
+
+\begin{verbatim}
+
+Call:
+lm(formula = log(count) ~ log(population_o) + log(population_d) + 
+    log(distance_km), data = df)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.5912 -1.2159 -0.4253  0.5771  7.8842 
+
+Coefficients:
+                   Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       -7.187371   0.217141 -33.100   <2e-16 ***
+log(population_o)  0.421124   0.011617  36.250   <2e-16 ***
+log(population_d)  0.315283   0.011083  28.448   <2e-16 ***
+log(distance_km)   0.005887   0.010177   0.578    0.563    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.732 on 69648 degrees of freedom
+Multiple R-squared:  0.02867,   Adjusted R-squared:  0.02863 
+F-statistic: 685.2 on 3 and 69648 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+\subsubsection{Logistic regression model with aggregated
+data}\label{logistic-regression-model-with-aggregated-data}
+
+\subsubsection{Poisson regression model}\label{poisson-regression-model}
+
+\begin{verbatim}
+
+Call:
+glm(formula = count ~ population_o + population_d + distance_km, 
+    family = poisson, data = df)
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  3.813e+00  1.154e-03 3303.33   <2e-16 ***
+population_o 1.604e-06  2.055e-09  780.54   <2e-16 ***
+population_d 1.710e-06  1.986e-09  861.12   <2e-16 ***
+distance_km  4.436e-06  8.285e-08   53.55   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 38519457  on 69651  degrees of freedom
+Residual deviance: 37499031  on 69648  degrees of freedom
+AIC: 37751790
+
+Number of Fisher Scoring iterations: 8
+\end{verbatim}
+
 \subsection{Extensions}\label{extensions}
+
+\subsubsection{Including push-pull
+factors}\label{including-push-pull-factors}
+
+\subsubsection{Negative binomial regression
+model}\label{negative-binomial-regression-model}
 
 \subsubsection{Generalised linear mixed gravity
 models}\label{generalised-linear-mixed-gravity-models}
@@ -373,5 +919,4 @@ models}\label{machine-learning-gravity-models}
 	& \\
 	\bottomrule
 \end{tabular*}
-
 \end{document}
