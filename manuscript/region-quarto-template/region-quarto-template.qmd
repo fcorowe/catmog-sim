@@ -249,9 +249,16 @@ head(df, n = 5 )
 # Estimating spatial interaction models {#sec-modelling}
 
 This section focuses on how to calibrate spatial interaction models in
-the form of gravity models. It starts with the classical mathematical
-formulation, then moves to basic statistical frameworks and their
-extensions.
+the form of gravity models. We use population at the origin and
+destination to represent the mass parameters and distance between
+centroids. However, the mass parameters should be thought as wider
+concepts capturing the broad set of factors that may at work operating
+to push flows away from origins and pulling flows towards destinations.
+Similarly, distance is a broad concept capturing the cost of spatial
+separation and could be measured by geographical distance, monetary,
+social and phsysological cost. The section starts with the classical
+mathematical formulation, then moves to basic statistical frameworks and
+their extensions.
 
 ## Mathematical gravity models
 
@@ -494,7 +501,7 @@ are arbitrary numbers and need to be empirically estimated. We will do
 this by using statistical models.
 
 ```{r}
-#| echo: true
+#| echo: false
 
 # predicted versus observed flows
 production_constrained_plot <- df %>% 
@@ -576,6 +583,11 @@ doubly_constrained_plot <- df %>%
 Use the following structure: describe the intuition of the model
 specification, and provide some interpretation of the results
 
+A first quick and dirty approach we can take is to use a simple linear
+regression model (LRM). This approach does not preserve the
+multiplicative nature of @eq-1. Rather, it assumes linearity in the
+relationship between the flows and the parameters of mass and distance.
+
 ### Linear regression model
 
 ```{r}
@@ -585,6 +597,10 @@ summary(lrm)
 ```
 
 ### Log-linear regression model
+
+$$
+log(T_{ij}) = log(\kappa) + \mu log( M_{i} )+ \gamma log( M_{j} ) - \beta log( D_{ij} )
+$$
 
 ```{r}
 loglrm <- lm( log(count) ~ log(population_o) + log(population_d) + log(distance_km),
@@ -704,6 +720,10 @@ lrm_plot + loglrm_plot + poissonrm_plot
 ## Extensions
 
 ### Including push-pull factors
+
+```{r}
+
+```
 
 ### Negative binomial regression model
 
