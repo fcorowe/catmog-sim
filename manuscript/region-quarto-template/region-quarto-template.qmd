@@ -93,20 +93,33 @@ square tend to hamper accessibility for the easy implementation of SIMs.
 
 This computational notebook contributes to redressing these issues. It
 aims to provide an intuitive, understandable and practical guide to
-estimate SIMs in a variety of modelling frameworks. It will include the
-necessary code to calibrate SIMs, using origin-destination
-travel-to-work data for the United Kingdom in R programming language.
-The code provided is generisable and can be adapted to different
-origin-destination flow data and contexts, including migration, student,
-transport, trade, currency, data transfer, vessel, shipment and freight
-flows.
+estimate SIMs in a variety of modelling frameworks. The focus is on "the
+how to" fit various models using a wide range of commonly used
+regression frameworks, moving from mathematical deterministic to
+cutting-edge machine learning formulations of SIMs. The focus is not on
+providing a comprehensive menu of all the posible modelling framework
+options. Also, while the notebook conducts some comparative analysis of
+predictive model performance for illustrative and explanation purposes,
+the focus is not on offering an exahustive framework to asses the
+predictive performance of the various SIM versions and selecting the
+best model for our data. However, the notebook does provide guidance on
+which model would be more appropriate in specific situations. It also
+includes all the necessary code to calibrate SIMs using
+origin-destination travel-to-work data for the England and Wales in R
+programming language. The code provided is transferable and portable. It
+can be adapted to different origin-destination flow data and contexts,
+including migration, student, transport, trade, currency, data transfer,
+vessel, shipment and freight flows. As such, I expect that this notebook
+will be a valuable resource for researchers, students and practitioners
+from across a range of disciplines working with counts relating two
+entities.
 
 The notebook is structured as follows. The next section sets out some
 fundamental concepts and definitions relating to SIMs. @sec-comenv
 identifies the libraries used before @sec-data describes the data.
 @sec-visualising illustrates key techniques to visualise complex spatial
 interaction data, and @sec-modelling shows and explains how to estimate
-SIMs using a range of modelling frameworks. It start with traditional
+SIMs using a range of modelling frameworks. It starts with traditional
 mathematical and Ordinary Least Squares (OLS) approaches to more
 advanced statistical frameworks, such as Generalised Linear Mixed Models
 (GLMMs) and machine learning algorithms.
@@ -191,10 +204,22 @@ library(tidyverse)
 library(sf)
 # generalised mixed linear modelling
 library(glmmTMB)
+# machine learning (xgboot)
+library(xgboost)
+# data resampling
+library(rsample)
+# correlation
+library(corrplot)
 # data visualisation
 library(scales)
 library(patchwork)
+library(ggsci)
+# regression reporting
+library(easystats)
+library(sjPlot)
+# data visualisation custom functions
 source("../../code/style/data-visualisation_theme.R")
+source("../../code/utils/utility-functions.R")
 ```
 
 # Data {#sec-data}
@@ -221,15 +246,15 @@ to work in Middlesbrough.
 ```{r}
 #| echo: true
 # read data
-df <- read_csv("../../data/output/sim_uk-travel-to-work_2021.csv") %>% 
+df <- read_csv("../../data/output/sim_uk-migration_2021.csv") %>% 
   # rename variables
   rename(
-    ltla_res_code = "Lower tier local authorities code",
-    ltla_res_name = "Lower tier local authorities label",
-    ltla_work_code = "LTLA of workplace code",
-    ltla_work_name = "LTLA of workplace label",
-    ltla_work_id_code = "Place of work indicator (4 categories) code",
-    ltla_work_id_lbl = "Place of work indicator (4 categories) label",
+    ltla_origin_code = "Lower tier local authorities code",
+    ltla_origin_name = "Lower tier local authorities label",
+    ltla_destination_code = "Lower tier local authorities code",
+    ltla_destination_name = "Lower tier local authorities label",
+    ltla_destination_id_code = "Place of work indicator (4 categories) code",
+    ltla_destination_id_lbl = "Place of work indicator (4 categories) label",
     count = "Count"
   ) %>% 
   # exclude the following observations:
@@ -244,7 +269,76 @@ df <- read_csv("../../data/output/sim_uk-travel-to-work_2021.csv") %>%
 head(df, n = 5 ) 
 ```
 
+We standardise selected variables for later use in our regression
+models. Variable standardisation brings predictors to a standard unit
+scale of measurement. It facilitates numerical stability in
+computations, especially for algorithms sensitive to variable magnitudes
+such as gradient descent [@standard2004, @schroeder2017]. It aids the
+interpretation of regression coefficients when interactions or
+regularisation (like Lasso or Ridge) are applied, preventing variables
+with larger scales from dominating the model [@schroeder2017].
+Additionally, standardisation can improve model convergence and ensure
+that the importance of predictors is appropriately assessed in terms of
+their contributions to predicting an outcome variable [@schroeder2017].
+
+```{r}
+df <- df %>%
+  dplyr::select(c(population_o, population_d, distance_km,
+                  higher_managerial_administrative_professional_o,
+                  higher_managerial_administrative_professional_d,
+                  ft_students_o,
+                  ft_students_d,
+                  never_worked_unemployed_o,
+                  never_worked_unemployed_d)) %>% 
+  mutate(across(where(is.numeric), ~ (. - mean(.)) / sd(.))) %>% 
+  rename(
+    st_population_o = population_o,
+    st_population_d = population_d,
+    st_distance_km = distance_km,
+    st_higher_managerial_administrative_professional_o = higher_managerial_administrative_professional_o,
+        st_higher_managerial_administrative_professional_d = higher_managerial_administrative_professional_d,
+    st_ft_students_o = ft_students_o,
+    st_ft_students_d = ft_students_d,
+    st_never_worked_unemployed_o = never_worked_unemployed_o,
+    st_never_worked_unemployed_d = never_worked_unemployed_d
+  ) %>% 
+  cbind(df, .)
+  
+```
+
 # Visualising spatial interaction data {#sec-visualising}
+
+The first recommended step before any data modelling is to descriptively
+analyse the distribution of the dependent variable. Much can be learned.
+Though we will not spend much time on this. I highly encourage the users
+of this guide to engage with this and explore visual and testing tools
+to explore the data. [@zuur2009] provide a useful protocol to explore
+common statistical problems in regression modelling. @fig-1 shows the
+distribution of commuting flows across England and Wales, revealing
+three distinct patterns. First, the distribution is fairly skewed as
+most origin-destination flow data are expected to be, with large flows
+to nearby areas but small flows to distant locations. Second, the number
+of people living and working in different LTLA areas is relatively
+small. About 23% of origin-destination flows contain observations taking
+the value of 1. That percentage raises to 48% if we consider
+observations taking the values of 1-3. This is an extremely large
+percentage which will introduce complexities as the data do not readily
+fit standard statistical distributions (e.g. normal or binomial). We
+will back to this point later. We should consider that these data were
+collected during the COVID-19 pandemic; hence, they are unlikely to be
+representative of pre-pandemic travel patterns. They were affected by
+COVID-19 restrictions, remote and hybrid working arrangements. Third, no
+observations with counts of zeros are recorded.
+
+::: {#fig-1}
+```{r}
+#| warning: false
+ggplot(data = df, aes(x = count)) +
+  geom_histogram(bins=100, binwidth = 0.5) +
+  xlim(NA, 100) +
+  theme_plot_tufte()
+```
+:::
 
 # Estimating spatial interaction models {#sec-modelling}
 
@@ -265,7 +359,7 @@ their extensions.
 ### Unconstrained model
 
 We start by implementing the mathematical formulation of gravity models
-using @eq-1. We adopt the standard Newtonian formulation assuming that
+using @eq-2. We adopt the standard Newtonian formulation assuming that
 $\mu$ and $\gamma$ equal to 1 and $\beta$ to -2, and fit an
 *unconstrained* model. Recall here that this model assumes that no
 information on flows is available. We use the population at origin and
@@ -281,7 +375,7 @@ flows of over 10 million which exceeds the size of the observed flows.
 This reflects the unconstrained nature of the model producing
 predictions based on distance, origin and destination only.
 
-::: {#fig-1}
+::: {#fig-2}
 ```{r, fig.width=3,fig.height=3}
 #| echo: true
 
@@ -578,34 +672,155 @@ doubly_constrained_plot <- df %>%
 ( production_constrained_plot + attraction_constrained_plot + doubly_constrained_plot)
 ```
 
+```{r}
+rm(production_constrained_plot, attraction_constrained_plot, doubly_constrained_plot)
+```
+
 ## Statistical gravity models
 
-Use the following structure: describe the intuition of the model
-specification, and provide some interpretation of the results
+<!--# Section structure: Use the following structure: describe the intuition of the model specification, and provide some interpretation of the results for the LRM first so readers have an ideas as to how to interpret the regression results. But then I could report a table containing the set of coefficients from various models -->
 
-A first quick and dirty approach we can take is to use a simple linear
-regression model (LRM). This approach does not preserve the
-multiplicative nature of @eq-1. Rather, it assumes linearity in the
-relationship between the flows and the parameters of mass and distance.
+Statistical models offer a flexible and robust framework to estimate
+@eq-1 and a battery of summary indicators to assess calibrated models.
+We can assess both their inferential and predictive capabilities. We
+will start by using a linear regression model (LRM) to build the
+foundations before progressing to more sophisticated modelling
+approaches. This approach does not preserve the multiplicative nature of
+@eq-1. Rather, it assumes linearity in the relationship between the
+flows and the parameters of mass and distance, but it provides an
+intuitive framework that we can use to understand more complex modelling
+frameworks.
 
 ### Linear regression model
 
+We estimate a LRM assuming that the commuting flows as a linear function
+of the population size at both origins and destinations as a proxy for
+the mass parameters of @eq-1, and distance between LDA centroids. We use
+standardised variables for this for the reasons outlined in @sec-data.
+We first focus on understanding the default R summary output. The first
+block indicates the equation fitted via LRM. The second block reports
+the residuals, revealing that the largest difference between observed
+flows and the model's predicted flows is over 22 thousand. The third
+block shows the standardised coefficient estimates representing the
+relationship between the flows and each predictors and their associated
+standard errors, t values and p-values. The fourth block displays
+overall model diagnostics indicating how well the model can predict the
+observed flows. The higher the $R^{2}$ statistics, the better the model
+fit indicating that the model does a good job at fitting the data. A
+p-value for the $F$ statistic smaller than 0.05 is often considered to
+be strong evidence to reject the null hypothesis that all of the
+relationships of the set of predictors included in the model are
+simultaneously zero.
+
 ```{r}
-lrm <- lm(count ~ population_o + population_d + distance_km,
+options(scipen=0)
+```
+
+```{r}
+#| echo: true
+lrm <- lm(count ~ st_population_o + st_population_d + st_distance_km,
           data = df)
 summary(lrm)
 ```
 
+Interpretation: the overall model diagnostics indicate that the model
+does not do a good job fitting the observed flows. A $R^{2}$ of $0.0048$
+indicates that model only explains $0.48$% of the variability in
+commuting flows. A $F-statistics$ of 113.5 with a $p-value$ of less than
+0.05 indicates that all coefficients for the predictor are statistically
+different from zero at lower than the 5% level of significance. In terms
+of the individual coefficients, only the coefficients for population
+size are statistically significant and positive. As predicted by the
+gravity model, the positive sign indicates that the size of commuting
+flows increase with the size of populations at origins and destinations.
+The coefficient for population at origin suggests that the expected size
+of commuting flow increases by $29.005$ for a one-standard-deviation
+increase (c.a. $133$ thousand) in the population at the origin.
+Surprisingly, albeit statistically insignificant, the coefficient for
+distance is positive. This contrasts with the key assumption of the
+gravity model that distance exerts a negative effect on spatial
+interactions. This does not seem to be the case for commuting flows in
+the UK where people travel to work from very far distances, particularly
+to London. The coefficient for the intercept indicates that the average
+expected commuting count is $2.187$ people for a a
+one-standard-deviation increase.
+
+-   ***Motivation to use other approaches***
+
+    Transformed counts
+
+    Untransformed counts
+
+    A distinguishing characteristic of many ecological data sets,whether
+    comprised of data measuring binary presence/absence, counts of
+    abundance, proportional occupancy ratesor continuous population
+    densities, is their tendency tocontain a large proportion of zero
+    values (Clarke & Green1988, Fig. 1). When this number of zeros is so
+    large that thedata do not readily fit standard distributions (e.g.
+    normal,Poisson, binomial, negative-binomial and beta), the data
+    setis referred to as  zero inflated  (Heilbron 1994; Tu 2002).Zero
+    inflation is often the result of a large number of  true zero 
+    observations caused by the real ecological effect ofinterest. For
+    example, the study of rare organisms or eventswill often lead to the
+    collection and analysis of data with ahigh frequency at zero (Welsh
+    et al. 1996). However, theterm can also be applied to data sets with
+    excess zeroscaused by  false-zero  observations because of sampling
+    orobserver errors in the course of data collection. Failure
+    toaccount for either source of zero inflation will cause bias
+    inparameter estimates and their associated measures ofuncertainty
+    (Lambert 1992; MacKenzie et al. 2002).The presence of zero inflation
+    due to excess true zeros, aspecial case of overdispersion (McCullagh
+    & Nelder 1989; Hinde & Deme´trio 1998; Poortema 1999), creates
+    problemswith making sound statistical inference by violating
+    basicassumptions implicit in the use of standard
+    distributions(Mullahy 1986; Cameron & Trivedi 1998). One
+    commonviolation is a misrepresentation of the
+    variance–meanrelationship of the error structure (Barry & Welsh
+    2002).In ecology, transformations are often used to overcomesuch
+    problems. However, the difficulty with this approachfor
+    zero-inflated data sets is that, while the transformationmay
+    normalize the distribution of the non-zero values, notransformation
+    will spread out the zero values. The highfrequency of zero values is
+    simply replaced by an equallyhigh frequency of the value to which
+    zero is transformed(Hall 2000).
+
 ### Log-linear regression model
 
 $$
-log(T_{ij}) = log(\kappa) + \mu log( M_{i} )+ \gamma log( M_{j} ) - \beta log( D_{ij} )
+log(T_{ij}) = log(\kappa) + \mu \times log( M_{i} )+ \gamma  \times log( M_{j} ) - \beta \times log( D_{ij} )
 $$
 
+Looging raw variables
+
 ```{r}
-loglrm <- lm( log(count) ~ log(population_o) + log(population_d) + log(distance_km),
+#| warning: false
+loglrm1 <- lm( log(count) ~ log(population_o) + log(population_d) + log(distance_km),
           data = df)
-summary(loglrm)
+summary(loglrm1)
+```
+
+Standardised variables
+
+```{r}
+loglrm2 <- lm( log(count) ~ st_population_o + st_population_d + st_distance_km,
+          data = df)
+summary(loglrm2)
+```
+
+logging and then standardising
+
+```{r}
+df$st_log_population_o <- scale( log(df$population_o) )
+df$st_log_population_d <- scale( log(df$population_d) )
+df$st_log_distance_km <- scale( log(df$distance_km) )
+
+loglrm3 <- lm( log(count) ~ st_log_population_o + st_log_population_d + st_log_distance_km,
+          data = df)
+summary(loglrm3)
+```
+
+```{r}
+model_parameters(loglrm1)
 ```
 
 ### Logistic regression model with aggregated data
@@ -613,7 +828,7 @@ summary(loglrm)
 ### Poisson regression model
 
 ```{r}
-poissonrm <- glm(count ~ population_o + population_d + distance_km,
+poissonrm <- glm(count ~ st_population_o + st_population_d + st_distance_km,
                  data = df,
                  family = poisson)
 summary(poissonrm)
@@ -623,25 +838,72 @@ summary(poissonrm)
 
 ```{r}
 # Production contrained 
-production_constrained_poissonrm <- glm(count ~ ltla_res_code +  population_o + population_d + distance_km,
+production_constrained_poissonrm <- glm(count ~ ltla_res_code +  st_population_o + st_population_d + st_distance_km,
                  data = df,
                  family = poisson)
 
 # Attraction contrained 
-attraction_constrained_poissonrm <- glm(count ~ ltla_work_code +  population_o + population_d + distance_km,
+attraction_constrained_poissonrm <- glm(count ~ ltla_work_code +  st_population_o + st_population_d + st_distance_km,
                  data = df,
                  family = poisson)
 
 # Doubly contrained 
-doubly_constrained_poissonrm <- glm(count ~ ltla_res_code + ltla_work_code +  population_o + population_d + distance_km,
+doubly_constrained_poissonrm <- glm(count ~ ltla_res_code + ltla_work_code +  st_population_o + st_population_d + st_distance_km,
                  data = df,
                  family = poisson)
 ```
 
+*Zero-inflated Poisson model*
+
+Overdispersion
+
+Ignoring zero inflation can have two consequences; firstly, the
+estimated parameters and standard errors may be biased, and secondly,
+the excessive number of zeros can cause overdispersion. Before
+discussing two techniques that can cope with all these zeros, we need to
+ask the question: Why do we have all these zeros?
+
+The extremely high number of zeros tells us that we should not apply an
+ordinary Poisson or negative binomial GLM as these would produce biased
+parameter estimates and standard errors. Instead one should consider
+zero inflated GLMs (Cameron & Trivedi 1998; Zuuret al. 2009a).
+
+The data used in many of these applications have certain
+commonalities.Events considered are often rare. The “law of rare events”
+is famously exemplified by Bortkiewicz’s 1898 study of the number of
+soldiers kicked to death in Prussian stables. Zero event counts are
+often dominant, leading to a skewed distribution. Also, there may be a
+great deal of unobserved heterogeneity in the individual experiences of
+the event in question. Unobserved heterogeneity leads to overdispersion;
+that is, the actual variance of the process exceeds the nominal Poisson
+variance even after regressors are introduced.
+
+Introduce glmmTMB
+
 ```{r}
+zi_prm <- glmmTMB(count ~ st_population_o + st_population_d + st_distance_km,
+                 data = df,
+                 ziformula = ~1,
+                 REML = FALSE,
+                 family = poisson)
+summary(zi_prm)
+```
+
+Little correlation - the best model is the
+doubly_constrained_poissonrm - high degree of correlation between the
+observed and prediecetd counts and smaller AIC, etc. But the correlation
+is not very high suggesting that the model can undergo significant
+improvements.
+
+```{r}
+# predicted flow
 df$lrm_predicted_flow <- predict(lrm, type = "response")
-df$loglrm_predicted_flow <- predict(loglrm, type = "response")
+df$loglrm_predicted_flow <- predict(loglrm2, type = "response")
 df$poissonrm_predicted_flow <- predict(poissonrm, type = "response")
+df$production_constrained_poissonrm_predicted_flow <- predict(production_constrained_poissonrm, type = "response")
+df$attraction_constrained_poissonrm_predicted_flow <- predict(attraction_constrained_poissonrm, type= "response")
+df$doubly_constrained_poissonrm_predicted_flow <- predict(doubly_constrained_poissonrm, type= "response")
+df$zi_prm_predicted_flow <- predict(zi_prm, type = "response")
 
 # predicted versus observed flows
 
@@ -714,7 +976,162 @@ poissonrm_plot <- df %>%
         axis.title=element_text(size=11)
         )
 
-lrm_plot + loglrm_plot + poissonrm_plot
+# Production constrained Poisson regression model (production_constrained_poissonrm)
+production_poissonrm_plot <- df %>% 
+  # remove predictions
+  ggplot( aes( x = count, y = production_constrained_poissonrm_predicted_flow)) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change labels
+  labs(y = "Production \n Poisson RM predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+
+# Doubly constrained Poisson regression model (doubly_constrained_poissonrm)
+doubly_poissonrm_plot <- df %>% 
+  # remove predictions
+  ggplot( aes( x = count, y = doubly_constrained_poissonrm_predicted_flow)) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change labels
+  labs(y = "Doubly constrained \n Poisson RM predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+# Zero-inflated Poisson regression model (zi_prm)
+zi_prm_plot <- df %>% 
+  # remove predictions
+  ggplot( aes( x = count, y = zi_prm_predicted_flow)) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(population_o / 1e1)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change labels
+  labs(y = "Zero-inflated \n Poisson RM predicted flow",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+lrm_plot + loglrm_plot + poissonrm_plot + production_poissonrm_plot + doubly_poissonrm_plot + zi_prm_plot
+```
+
+```{r}
+rm(lrm_plot, loglrm_plot, poissonrm_plot, production_poissonrm_plot, doubly_poissonrm_plot, zi_prm_plot)
+```
+
+```{r}
+# computing correlation coefficients
+cormat <- df %>% select( c(count, 
+                 lrm_predicted_flow, 
+                 loglrm_predicted_flow, 
+                 poissonrm_predicted_flow,
+                 production_constrained_poissonrm_predicted_flow,
+                 attraction_constrained_poissonrm_predicted_flow,
+                 doubly_constrained_poissonrm_predicted_flow,
+                 zi_prm_predicted_flow
+                 ) ) %>% 
+  cor(use = "complete.obs",
+      method = "pearson")
+  
+
+# significance test
+sig1 <- corrplot::cor.mtest(cormat,
+                            conf.level = .95)
+
+# relabel
+colnames(cormat) <- c("count",
+                      "lrm", 
+                      "log_lrm", 
+                      "poisson",
+                      "production_poisson",
+                      "attraction_poisson",
+                      "doubly_poisson",
+                      "zi_poisson")
+
+rownames(cormat) <- c("count",
+                      "lrm", 
+                      "log_lrm", 
+                      "poisson",
+                      "production_poisson",
+                      "attraction_poisson",
+                      "doubly_poisson",
+                      "zi_poisson")
+
+# create a correlogram
+corrplot::corrplot(cormat,
+         method = 'circle',
+         type = "lower",
+         addCoef.col = 'grey70',
+         diag = FALSE,
+         number.cex = 1,
+         tl.pos = "u",
+         tl.cex = 0.9,
+         cl.ratio = 0.2,
+         bg = 'white')
+
+```
+
+There is
+a [`plot()`](https://rdrr.io/r/graphics/plot.default.html)-method
+for `compare_performance()`, which creates a "spiderweb" plot, where the
+different indices are normalized and larger values indicate better model
+performance. Hence, points closer to the center indicate worse fit
+indices
+
+```{r}
+plot(compare_performance(lrm, 
+                         loglrm2, 
+                         poissonrm, 
+                         production_constrained_poissonrm,
+                         attraction_constrained_poissonrm,
+                         doubly_constrained_poissonrm,
+                         zi_prm,
+                         rank = TRUE, verbose = FALSE))
+```
+
+Overdispersion test
+
+```{r}
+check_overdispersion(doubly_constrained_poissonrm)
+```
+
+```{r}
+rm(lrm, loglrm2, poissonrm, production_constrained_poissonrm, attraction_constrained_poissonrm,
+doubly_constrained_poissonrm, zi_prm)
 ```
 
 ## Extensions
@@ -722,13 +1139,320 @@ lrm_plot + loglrm_plot + poissonrm_plot
 ### Including push-pull factors
 
 ```{r}
+extended_poissonrm <- glm(count ~ 
+                            # gravity variables
+                            st_population_o + st_population_d + st_distance_km +
+                            # occupation composition
+                            st_higher_managerial_administrative_professional_o + 
+                            st_higher_managerial_administrative_professional_d +
+                            # employment composition
+                            st_never_worked_unemployed_o + 
+                            st_never_worked_unemployed_d,
+                 data = df,
+                 family = poisson)
 
+custom_summary(extended_poissonrm)
 ```
 
 ### Negative binomial regression model
 
+*NB1 parameterisation*
+
+```{r}
+nbr1 <- glmmTMB(count ~ 
+                      # gravity variables
+                      st_population_o + st_population_d + st_distance_km +
+                      # occupation composition
+                      st_higher_managerial_administrative_professional_o + 
+                      st_higher_managerial_administrative_professional_d +
+                      # employment composition
+                      st_never_worked_unemployed_o + 
+                      st_never_worked_unemployed_d,
+                    data = df,
+                    ziformula =~ 0,
+                    family = nbinom1)
+```
+
+*NB2 parameterisation*
+
+```{r}
+nbr2 <- glmmTMB(count ~ 
+                      # gravity variables
+                      st_population_o + st_population_d + st_distance_km +
+                      # occupation composition
+                      st_higher_managerial_administrative_professional_o + 
+                      st_higher_managerial_administrative_professional_d +
+                      # employment composition
+                      st_never_worked_unemployed_o + 
+                      st_never_worked_unemployed_d,
+                    data = df,
+                    ziformula =~ 0,
+                    family = nbinom2)
+```
+
 ### Generalised linear mixed gravity models
 
+Explain the intuition of hierarchical modelling - capture
+heterogeneity - explain output and random effects - how various
+structures can be specified using nested and cross random effect
+structures.
+
+```{r}
+glmm_nbr2 <- glmmTMB(count ~ 
+                  # gravity variables
+                  st_population_o + st_population_d + st_distance_km +
+                  # occupation composition
+                  st_higher_managerial_administrative_professional_o + 
+                  st_higher_managerial_administrative_professional_d +
+                  # employment composition
+                  st_never_worked_unemployed_o + 
+                  st_never_worked_unemployed_d +
+                  # random intercept
+                  (1 | ltla_res_name + ltla_work_name),
+                    data = df,
+                    ziformula =~ 0,
+                    family = nbinom2)
+custom_summary(glmm_nbr2)
+```
+
+plot_models - Forest plot of multiple regression models
+
+```{r}
+plot_models(extended_poissonrm, nbr1, nbr2, glmm_nbr2,
+            legend.title = "",
+            spacing = .7,
+            transform = NULL,
+            line.size = 1,
+            vline.color = "grey85",
+            axis.labels = c(
+              "Unemployed_d", "Unemployed_o", "Professional_d", "Professional_o", "Distance", "Population_d", "Population_o" 
+              )
+) + 
+  # change colour palette
+  scale_color_npg(labels = c("GLMM NB", "NB2", "NB1", "Poisson")) + 
+  scale_fill_npg(labels = c("GLMM NB", "NB2", "NB1", "Poisson")) +
+  theme_plot_tufte() +
+  theme(
+    text = element_text(family = "robotocondensed", size = 18),
+    plot.title = element_text(size = 25),
+    # legend
+    legend.title=element_text(size=15), 
+    legend.text=element_text(size=14),
+    legend.position = "right"
+  )
+```
+
+```{r}
+plot(compare_performance(extended_poissonrm,  glmm_nbr2,
+                         rank = TRUE, verbose = FALSE))
+```
+
+```{r}
+ranef(glmm_nbr2) %>% 
+  {.$cond[["ltla_res_name"]]} %>% 
+  head(5)
+```
+
+```{r}
+plot_model(glmm_nbr2,
+           title = "Random effects of place of residence",
+           transform = NULL,
+           type = "re", 
+           sort.est = "sort.all",
+           grid = FALSE,
+           ri.nr = 1,
+           line.size = 1,
+            vline.color = "grey80"
+           )
+```
+
+```{r}
+rm(extended_poissonrm, nbr1, nbr2, glmm_nbr2)
+```
+
 ### Machine learning gravity models
+
+Data wrangling
+
+```{r}
+input_df <- df %>% 
+  dplyr::select( c(count, ltla_res_name, ltla_work_name, st_population_o, st_population_d, st_distance_km, st_higher_managerial_administrative_professional_o, st_higher_managerial_administrative_professional_d, st_never_worked_unemployed_o, st_never_worked_unemployed_d)) %>% 
+  drop_na()
+```
+
+*Setting up model*
+
+```{r}
+# Proportion of time-series data to assign to training vs testing
+train_prop <- 0.8
+
+# Proportion of training data which should be used to train the hyper-parameters
+train_sample_prop <- 0.8
+
+# Proportion of training data which should be used to validate the hyper-parameters
+test_sample_prop <- 1
+
+# Should the training and testing date be cut randomly ("random") or temporally ("temporal")?
+cut <- "random"
+
+# Independent variables
+xvars <- colnames(input_df[, 4:ncol(input_df)])
+
+# Final model inputs
+y <- "count"
+x <- c(xvars)
+```
+
+*Defining training and test data sets*
+
+```{r}
+set.seed(123)
+split_df <- initial_split(input_df, prop = train_sample_prop)
+train_sample <- training(split_df)
+test_sample  <- testing(split_df)
+```
+
+```{r}
+# variable names
+features <- xvars
+
+# create the treatment plan from the training data
+treatplan <- vtreat::designTreatmentsZ(train_sample, 
+                                       features, 
+                                       verbose = FALSE)
+
+# get the "clean" variable names from the scoreFrame
+new_vars <- treatplan %>%
+  magrittr::use_series(scoreFrame) %>%        
+  dplyr::filter(code %in% c("clean", "lev")) %>% 
+  magrittr::use_series(varName)  
+
+# prepare the training data
+features_train <- vtreat::prepare(treatplan, 
+                                  train_sample, 
+                                  varRestriction = new_vars) %>% 
+  as.matrix()
+
+response_train <- train_sample[,y]
+
+# prepare the test data
+features_test <- vtreat::prepare(treatplan, 
+                                 test_sample, 
+                                 varRestriction = new_vars) %>% 
+  as.matrix()
+
+response_test <- test_sample[, y]
+
+# dimensions of one-hot encoded data
+dim(features_train)
+dim(features_test)
+```
+
+*Training*
+
+```{r}
+xgb.fit1 <- xgb.cv(
+  data = features_train,
+  label = as.matrix(response_train),
+  nrounds = 1000,
+  nfold = 10,
+  objective = "reg:squarederror",  # for regression models
+  verbose = 0,               # silent,
+)
+```
+
+```{r}
+# get number of trees that minimize error
+xgb.fit1$evaluation_log %>%
+  dplyr::summarise(
+    ntrees.train = which(train_rmse_mean == min(train_rmse_mean))[1],
+    rmse.train   = min(train_rmse_mean),
+    ntrees.test  = which(test_rmse_mean == min(test_rmse_mean))[1],
+    rmse.test   = min(test_rmse_mean),
+  )
+
+# plot error vs number trees
+ggplot(xgb.fit1$evaluation_log) +
+  geom_line(aes(iter, train_rmse_mean), color = "red") +
+  geom_line(aes(iter, test_rmse_mean), color = "blue")
+```
+
+*Final model*
+
+```{r}
+# parameter list
+params <- list(
+  eta = 0.3,
+  max_depth = 6,
+  min_child_weight = 1
+)
+
+# train final model
+xgb.fit.final <- xgboost(
+  params = params,
+  data = features_train,
+  label = as.matrix(response_train),
+  nrounds = 2000,
+  objective = "reg:squarederror",
+  verbose = 0,
+  early_stopping_rounds = 15)
+```
+
+```{r}
+# predicted flow
+train_sample$train_xgboost_predicted_flow <- predict(xgb.fit.final, as.matrix(train_sample[ , 4:10]))
+test_sample$test_xgboost_predicted_flow <- predict(xgb.fit.final, as.matrix(test_sample[ , 4:10]))
+
+
+# predicted versus observed flows
+train_plot <- train_sample %>% 
+  ggplot( aes( x = count, y = train_xgboost_predicted_flow)) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(st_population_o)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  scale_x_continuous(
+    labels = label_number(scale_cut = cut_short_scale())
+    ) + 
+  # change labels
+  labs(y = "XGBoost predicted flow \n training data",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+# predicted versus observed flows
+test_plot <- test_sample %>% 
+  ggplot( aes( x = count, y = test_xgboost_predicted_flow)) +
+  geom_point( alpha = .5, colour = "darkblue",
+              aes( size = abs(st_population_o)) ) +
+  # change axis label to a shorthand
+  scale_y_continuous(
+    labels = scales::label_number(scale_cut = scales::cut_si(""))
+    ) +
+  scale_x_continuous(
+    labels = scales::label_number(scale_cut = scales::cut_si(""))
+    ) + 
+  # change labels
+  labs(y = "XGBoost predicted flow \n testing data",
+       x = "Observed flow") +
+  theme_plot_tufte() +
+  theme(legend.position = "none",
+        axis.text.y = element_text(size = 9),
+        axis.text.x = element_text(size = 9),
+        axis.title=element_text(size=11)
+        )
+
+train_plot + test_plot
+```
+
+```{r}
+collect_predictions(xgb.fit.final)
+```
 
 # References
