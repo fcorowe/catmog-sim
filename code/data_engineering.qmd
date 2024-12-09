@@ -13,7 +13,8 @@ library(future.apply)
 
 ```{r}
 # census population data
-si_df <- read_csv("../data/input/ODWP01EW_LTLA.csv")
+#si_df <- read_csv("../data/input/ODWP01EW_LTLA.csv")
+si_df <- read_csv("../data/input/ODMG01EW_LTLA.csv")
 var_df <- read_csv("../data/input/combined-data-ltla.csv")
 # census boundaries
 ltla_sdf <- st_read("../data/input/LAD_Dec_2021_GB_BFC_2022_simplified.gpkg")
@@ -22,9 +23,9 @@ ltla_sdf <- st_read("../data/input/LAD_Dec_2021_GB_BFC_2022_simplified.gpkg")
 # Population data
 
 ```{r}
-joined_dfo <- left_join(si_df, var_df, by = c("Lower tier local authorities code" = "geography.code") )
+joined_dfo <- left_join(si_df, var_df, by = c("Migrant LTLA one year ago code" = "geography.code") )
 
-joined_dfod <- left_join(joined_dfo, var_df, by = c("LTLA of workplace code" = "geography.code") )
+joined_dfod <- left_join(joined_dfo, var_df, by = c("Lower tier local authorities code" = "geography.code") )
 
 head(joined_dfod)
 ```
@@ -32,12 +33,18 @@ head(joined_dfod)
 ```{r}
 subset_joined_dfod <- joined_dfod %>% select("Lower tier local authorities code", 
        "Lower tier local authorities label",
-       "LTLA of workplace code",
-       "LTLA of workplace label",
-       "Place of work indicator (4 categories) code",
-       "Place of work indicator (4 categories) label",
+       # "LTLA of workplace code",
+       # "LTLA of workplace label",
+       # "Place of work indicator (4 categories) code",
+       # "Place of work indicator (4 categories) label",
+       "Migrant LTLA one year ago code",
+       "Migrant LTLA one year ago label",
        "Count",
        "total_residents.x",
+       "per_age_15-19.x",
+       "per_age_20-24.x",
+       "per_age_25-29.x",
+       "per_hh_notdeprived.x",
        "per_NS_SeC_L123_higher_managerial_administrative_professional.x",
        "per_NS_SeC_L456_lower_managerial_administrative_professional.x",
        "per_NS_SeC_L7_intermediate.x",
@@ -50,6 +57,10 @@ subset_joined_dfod <- joined_dfod %>% select("Lower tier local authorities code"
        "per_no_qualifications.x",
        "per_level4.x",
        "total_residents.y",
+       "per_age_15-19.y",
+       "per_age_20-24.y",
+       "per_age_25-29.y",
+       "per_hh_notdeprived.y",
        "per_NS_SeC_L123_higher_managerial_administrative_professional.y",
        "per_NS_SeC_L456_lower_managerial_administrative_professional.y",
        "per_NS_SeC_L7_intermediate.y",
@@ -63,6 +74,10 @@ subset_joined_dfod <- joined_dfod %>% select("Lower tier local authorities code"
        "per_level4.y"
 ) %>% rename(
       "population_o" = "total_residents.x",
+       "age_15-19_o"  = "per_age_15-19.x",
+       "age_20-24_o" ="per_age_20-24.x",
+       "age_25-29_o"  = "per_age_25-29.x",
+       "notdeprived_o" =  "per_hh_notdeprived.x",
       "higher_managerial_administrative_professional_o" =  "per_NS_SeC_L123_higher_managerial_administrative_professional.x",
       "lower_managerial_administrative_professional_o" =  "per_NS_SeC_L456_lower_managerial_administrative_professional.x",
       "intermediate_o"= "per_NS_SeC_L7_intermediate.x",
@@ -75,6 +90,10 @@ subset_joined_dfod <- joined_dfod %>% select("Lower tier local authorities code"
       "no_qualifications_o" = "per_no_qualifications.x",
       "level4_o" = "per_level4.x",
       "population_d" = "total_residents.y",
+       "age_15-19_d"  = "per_age_15-19.y",
+       "age_20-24_d" ="per_age_20-24.y",
+       "age_25-29_d"  = "per_age_25-29.y",
+       "notdeprived_d" =  "per_hh_notdeprived.y",
       "higher_managerial_administrative_professional_d" =  "per_NS_SeC_L123_higher_managerial_administrative_professional.y",
       "lower_managerial_administrative_professional_d" =  "per_NS_SeC_L456_lower_managerial_administrative_professional.y",
       "intermediate_d"= "per_NS_SeC_L7_intermediate.y",
@@ -92,7 +111,8 @@ head(joined_dfod)
 ```
 
 ```{r}
-write_csv(subset_joined_dfod, "../data/output/sim_uk-travel-to-work_2021_intermediate.csv")
+#write_csv(subset_joined_dfod, "../data/output/sim_uk-travel-to-work_2021_intermediate.csv")
+write_csv(subset_joined_dfod, "../data/output/sim_uk-migration_2021_intermediate.csv")
 ```
 
 # Distance
@@ -188,16 +208,21 @@ write_csv(distance_long, "../data/output/sim_uklda-distance.csv")
 ## Merge population and distance
 
 ```{r}
-joined_dfod <- left_join(subset_joined_dfod, distance_long, by = c("Lower tier local authorities code" = "origin", "LTLA of workplace code" = "destination") )
+#joined_dfod <- left_join(subset_joined_dfod, distance_long, by = c("Lower tier local authorities code" = "origin", "LTLA of workplace code" = "destination") )
+
+joined_dfod <- left_join(subset_joined_dfod, distance_long, by = c("Migrant LTLA one year ago code" = "origin", "Lower tier local authorities code" = "destination") )
 ```
 
 ## Remove Scotland and Northern Ireland-bounded counts
 
 ```{r}
+# filtered_joined_dfod <- joined_dfod %>%
+#   filter(!grepl("^[SN]", `LTLA of workplace code`))
 filtered_joined_dfod <- joined_dfod %>%
-  filter(!grepl("^[SN]", `LTLA of workplace code`))
+  filter(!grepl("^[SN]", `Migrant LTLA one year ago code`))
 ```
 
 ```{r}
-write_csv(filtered_joined_dfod, "../data/output/sim_uk-travel-to-work_2021.csv")
+# write_csv(filtered_joined_dfod, "../data/output/sim_uk-travel-to-work_2021.csv")
+write_csv(filtered_joined_dfod, "../data/output/sim_uk-migration_2021.csv")
 ```
